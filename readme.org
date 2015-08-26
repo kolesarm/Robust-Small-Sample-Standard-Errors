@@ -3,9 +3,12 @@
 The =R= function ~BMlmSE(model, clustervar=NULL, ell=NULL, IK=TRUE)~ implements
 the Bell-McCaffrey standard error degrees-of-freedom adjustment and associated
 standard errors for regression parameters in the linear regression
-$$Y_i=X_i'\beta+\epsilon_i$$ as described in Imbens and Kolesár, "Robust
-Standard Errors in Small Samples: Some Practical Advice" (forthcoming, Review of
+Y_i=X_i'\beta+\epsilon_i as described in Imbens and Kolesár, "Robust Standard
+Errors in Small Samples: Some Practical Advice" (forthcoming, Review of
 Economics and Statistics).
+
+** Dependencies
+The code needs the =sandwich= package to be installed
 
 ** Arguments
 - The first argument, =model=, takes a model fitted using the =lm()= function
@@ -14,7 +17,7 @@ Economics and Statistics).
   computes heteroscedasticity-robust standard errors.
 - The vector =ell=, of the same length as the dimension of the covariates,
   specifies which linear combination of coefficients to compute. If supplied,
-  the command computes the standard error for \ell'\beta. Otherwise the
+  the command computes the standard error for =ell='\beta. Otherwise the
   function computes standard errors for each element of \beta.
 - The flag =IK=, only relevant if cluster-robust standard errors are being
   computed, specifies whether to compute the degrees-of-freedom adjustment using
@@ -22,17 +25,16 @@ Economics and Statistics).
 
 ** Value
 The function returns a list with the following components:
-- =vcov= :: Variance-covariance matrix estimator of \hat{\beta}. For the case
-            without clustering, it corresponds to the HC2 estimator (see
-            MacKinnon and White, 1985 and the reference manual for the
-            =sandwich= package). For the case with clustering, it corresponds to
-            a generalization of the HC2 estimator, called LZ2 in Imbens and
-            Kolesár.
+- =vcov= :: Variance-covariance matrix estimator. For the case without
+            clustering, it corresponds to the HC2 estimator (see MacKinnon and
+            White, 1985 and the reference manual for the =sandwich= package).
+            For the case with clustering, it corresponds to a generalization of
+            the HC2 estimator, called LZ2 in Imbens and Kolesár.
 - =dof= :: Degrees-of-freedom adjustment
 - =adj.se= :: Adjusted standard errors. For \beta_j, they are defined as
               : adj.se[j]=sqrt(vcov[j,j]se*qt(0.975,df=dof)
               so that the Bell-McCaffrey confidence intervals are given as
-              $$\hat{\beta}_j\pm 1.96\texttt{adj.se}$$
+              \hat{\beta}_j\pm 1.96=adj.se=
 - =se.Stata= :: Square root of the cluster-robust variance estimator used in
                 =STATA=.
 
