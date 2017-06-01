@@ -3,9 +3,7 @@
 The =R= function ~BMlmSE(model, clustervar=NULL, ell=NULL, IK=TRUE)~ implements
 the Bell-McCaffrey standard error degrees-of-freedom adjustment and associated
 standard errors for regression parameters in the linear regression
-Y_i=X_i'\beta+\epsilon_i as described in Imbens and Kolesár, "Robust Standard
-Errors in Small Samples: Some Practical Advice" (forthcoming, Review of
-Economics and Statistics).
+Y_i=X_i'\beta+\epsilon_i as described in [[http://www.mitpressjournals.org/doi/abs/10.1162/REST_a_00552][Imbens and Kolesár (2016), ReStat]]
 
 ** Dependencies
 The code needs the =sandwich= package to be installed
@@ -34,7 +32,7 @@ The function returns a list with the following components:
 - =adj.se= :: Adjusted standard errors. For \beta_j, they are defined as
               : adj.se[j]=sqrt(vcov[j,j]se*qt(0.975,df=dof)
               so that the Bell-McCaffrey confidence intervals are given as
-              \hat{\beta}_j\pm 1.96=adj.se=
+              =coefficients(fm)[j] +- 1.96* adj.se=
 - =se.Stata= :: Square root of the cluster-robust variance estimator used in
                 =STATA=.
 
