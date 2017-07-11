@@ -5,6 +5,10 @@ the Bell-McCaffrey standard error degrees-of-freedom adjustment and associated
 standard errors for regression parameters in the linear regression
 Y_i=X_i'\beta+\epsilon_i as described in [[http://www.mitpressjournals.org/doi/abs/10.1162/REST_a_00552][Imbens and Kolesár (2016), ReStat]]
 
+SAS version by Nicolas Moreau is available [[http://cemoi.univ-reunion.fr/econometrie-avec-r-et-sas][here]].
+
+
+
 ** Dependencies
 The code needs the =sandwich= package to be installed
 

@@ -58,7 +58,6 @@ MatSqrtInverse <- function(A) {
 #' #next two in cluster 2, and the last three in cluster three.
 #' clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
 #' BMlmSE(fm, clustervar)
-
 BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     X <- model.matrix(model)
     sum.model <- summary.lm(model)
@@ -151,6 +150,6 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     }
     names(dof) <- names(se)
 
-    return(list(vcov=Vhat, dof=dof, adj.se=se*qt(0.975, df=dof)/qnorm(0.975),
-                se=se, se.Stata=se.Stata))
+    list(vcov=Vhat, dof=dof, adj.se=se*qt(0.975, df=dof)/qnorm(0.975),
+                se=se, se.Stata=se.Stata)
 }
