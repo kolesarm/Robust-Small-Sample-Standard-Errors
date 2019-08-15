@@ -1,4 +1,9 @@
-* Robust Confidence Intervals in Small Samples
+# dfadjust
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## Description
 
 The =R= function ~BMlmSE(model, clustervar=NULL, ell=NULL, IK=TRUE)~ implements
 the Bell-McCaffrey standard error degrees-of-freedom adjustment and associated
@@ -9,10 +14,11 @@ SAS version by Nicolas Moreau is available [[http://cemoi.univ-reunion.fr/econom
 
 
 
-** Dependencies
+## Dependencies
 The code needs the =sandwich= package to be installed
 
-** Arguments
+## Arguments
+
 - The first argument, =model=, takes a model fitted using the =lm()= function
 - =clustervar= is a factor variable that defines clusters. The command computes
   cluster-robust standard errors if the variable is supplied, otherwise it
@@ -25,7 +31,7 @@ The code needs the =sandwich= package to be installed
   computed, specifies whether to compute the degrees-of-freedom adjustment using
   the Imbens-Kolesár method (if =TRUE=), or the Bell-McCaffrey method (if =FALSE=)
 
-** Value
+## Value
 The function returns a list with the following components:
 - =vcov= :: Variance-covariance matrix estimator. For the case without
             clustering, it corresponds to the HC2 estimator (see MacKinnon and
@@ -40,9 +46,21 @@ The function returns a list with the following components:
 - =se.Stata= :: Square root of the cluster-robust variance estimator used in
                 =STATA=.
 
+
+
+## Installation
+
+You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("dfadjust")
+```
+
+## Example
+
 ** Examples
 No clustering:
-#+begin_src R
+``` r
 set.seed(42)
 x <- sin(1:10)
 y <- rnorm(10)
@@ -53,6 +71,6 @@ Clustering:
 #+begin_src R
 clustervar <- as.factor(c(rep(1,6),rep(2,2),rep(3,2)))
 BMlmSE(fm, clustervar)
-#+end_src
+```
 Here we defined the first six observations to be in cluster 1, the next two in
 cluster 2, and the last three in cluster three.

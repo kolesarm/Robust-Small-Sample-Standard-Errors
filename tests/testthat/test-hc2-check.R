@@ -1,5 +1,23 @@
-#'  Compute the inverse square root of a symmetric matrix
-#' @param A matrix
+context("Test formulas")
+
+test_that("HC1 and HC2 formulas match sandwich", {
+    set.seed(42)
+    y <- rnorm(10)
+    x <- cbind(sin(1:10), sin(2:11))
+    fm <- lm(y~x)
+
+    HC1 <- sandwich::vcovHC(fm, type="HC1")
+    HC2 <- sandwich::vcovHC(fm, type="HC2")
+    r <- dfadjustSE(fm)
+
+    expect_lt(max(abs(r$vcov-HC2)), 100*.Machine$double.eps)
+    expect_lt(max(abs(r$se.Stata-sqrt(diag(HC1)))), 100*.Machine$double.eps)
+})
+
+
+test_that("New implementation matches old", {
+
+## Compute the inverse square root of a symmetric matrix
 MatSqrtInverse <- function(A) {
 
     ei <- eigen(A, symmetric=TRUE)
@@ -14,50 +32,6 @@ MatSqrtInverse <- function(A) {
     ei$vectors %*% (if (length(d2)==1) d2 else diag(d2)) %*% t(ei$vectors)
 }
 
-#' Compute Bell-McCaffrey Standard Errors
-#' @param model Fitted model returned by the \code{lm} function
-#' @param clustervar Factor variable that defines clusters. If \code{NULL} (or
-#'     not supplied), the command computes heteroscedasticity-robust standard
-#'     errors, rather than cluster-robust standard errors.
-#' @param ell A vector of the same length as the dimension of covariates,
-#'     specifying which linear combination \eqn{\ell'\beta} of coefficients
-#'     \eqn{\beta} to compute. If \code{NULL}, compute standard errors for each
-#'     regressor coefficient
-#' @param IK Logical flag only relevant if cluster-robust standard errors are
-#'     being computed. Specifies whether to compute the degrees-of-freedom
-#'     adjustment using the Imbens-Kolesár method (if \code{TRUE}), or the
-#'     Bell-McCaffrey method (if \code{FALSE})
-#' @return Returns a list with the following components \describe{
-#'
-#' \item{vcov}{Variance-covariance matrix estimator. For the case without
-#' clustering, it corresponds to the HC2 estimator (see MacKinnon and White,
-#' 1985 and the reference manual for the \code{sandwich} package). For the case
-#' with clustering, it corresponds to a generalization of the HC2 estimator,
-#' called LZ2 in Imbens and Kolesár.}
-#'
-#' \item{dof}{Degrees-of-freedom adjustment}
-#'
-#' \item{se}{Standard error}
-#'
-#' \item{adj.se}{Adjusted standard errors. For \beta_j, they are defined as
-#' \code{adj.se[j]=sqrt(vcov[j,j]se*qt(0.975,df=dof)} so that the Bell-McCaffrey
-#' confidence intervals are given as \code{coefficients(fm)[j] +- 1.96* adj.se=}
-#'
-#' \item{se.Stata}{Square root of the cluster-robust variance estimator used in
-#' STATA}
-#'
-#' }
-#' @examples
-#' ## No clustering:
-#' set.seed(42)
-#' x <- sin(1:10)
-#' y <- rnorm(10)
-#' fm <- lm(y~x)
-#' BMlmSE(fm)
-#' ## Clustering, defining the first six observations to be in cluster 1, the
-#' #next two in cluster 2, and the last three in cluster three.
-#' clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
-#' BMlmSE(fm, clustervar)
 BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     X <- model.matrix(model)
     sum.model <- summary.lm(model)
@@ -153,3 +127,29 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     list(vcov=Vhat, dof=dof, adj.se=se*qt(0.975, df=dof)/qnorm(0.975),
                 se=se, se.Stata=se.Stata)
 }
+
+
+    set.seed(42)
+    y <- rnorm(10)
+    x <- cbind(sin(1:10), cos(2:11))
+    clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
+    fm <- lm(y~x)
+
+    ## No clustering
+    r <- dfadjustSE(fm)
+    rold <- BMlmSE(fm)
+    expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
+    expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
+    expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
+    expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
+    ## Clustering
+    r <- dfadjustSE(fm, clustervar)
+    rold <- BMlmSE(fm, clustervar)
+    expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
+    expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
+    ## expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
+    ## expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
+    ## TODO: IK
+
+
+})
