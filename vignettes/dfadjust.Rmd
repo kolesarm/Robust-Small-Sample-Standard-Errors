@@ -1,0 +1,191 @@
+---
+output:
+  pdf_document:
+    citation_package: natbib
+    latex_engine: pdflatex
+    template: mk_Rpackage_template.tex
+    toc: true
+    toc_depth: 2
+    includes:
+        in_header: vignette_head.tex
+    keep_tex: true
+title: "Robust Standard Errors in Small Samples "
+author: "Michal Kolesár"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontfamily: mathpazo
+bibliography: library.bib
+fontsize: 11pt
+vignette: >
+  %\VignetteIndexEntry{dfadjust}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE, cache=FALSE}
+library("knitr")
+knitr::opts_knit$set(self.contained = FALSE)
+knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",
+                      tidy.opts=list(blank=FALSE, width.cutoff=55))
+```
+
+# Description
+
+```{r setup}
+library(dfadjust)
+```
+The implementation, described below, allows for fixed effects and for large clusters. Example:
+
+
+# Methods
+
+This section describes the implementation of the @ImKo16 and @BeMc02 degrees of
+freedom adjustments.
+
+There are $S$ clusters, and we observe $n_{s}$ observations in cluster $s$, for
+a total of $n=\sum_{s=1}^{S}n_{s}$ observations. We handle the case with
+independent observations by letting each observation be in its own cluster, with
+$S=n$. Consider the linear regression
+of a scalar outcome $Y_{i}$ onto a $p$-vector of regressors $X_{i}$,
+\begin{equation*}
+  Y_{i}=X_{i}'\beta+u_{i},\qquad E[u_{i}\mid X_{i}]=0.
+\end{equation*}
+We're interested in inference on $\ell'\beta$ for some fixed vector
+$\ell\in\mathbb{R}^{p}$. Let $X$, $u$, and $Y$ denote the design matrix, and
+error and outcome vectors, respectively. For any $n\times k$ matrix $M$, let
+${M}_{s}$ denote the $n_{s}\times k$ block corresponding to cluster $s$, so
+that, for instance, $Y_{s}$ corresponds to the outcome vector in cluster $s$.
+For a positive semi-definite matrix ${M}$, let ${M}^{1/2}$ be a matrix
+satisfying ${{M}^{1/2}}'{M}^{1/2}={M}$, such as its symmetric square root or its
+Cholesky decomposition.
+
+Assume that
+\begin{equation*}
+  E[u_{s}u_{s}'\mid X]=\Omega_{s},\quad\text{and}\quad
+  E[u_{s}u_{t}'\mid X]=0\quad\text{if $s\neq t$}.
+\end{equation*}
+Denote the conditional variance matrix of $u$ by $\Omega$, so that $\Omega_{s}$
+is the block of $\Omega$ corresponding to cluster $s$. We estimate $\ell'\beta$
+using OLS. In `R`, the OLS estimator is computed via a QR decomposition, $X=QR$,
+where $Q'Q=I$ and $R$ is upper-triangular, so we can write the estimator as
+\begin{equation*}
+  \ell'\hat{\beta}=\ell'\left(\sum_{s}X_{s}'X_{s}\right)^{-1}\sum_{s}X_{s}Y_{s}
+  =\tilde{\ell}'\sum_{s}Q_{s}'Y_{s},\qquad \tilde{\ell}={R^{-1}}'\ell.
+\end{equation*}
+It has variance
+\begin{equation*}
+  V:=  \var(\ell'\hat{\beta}\mid X)
+  =\ell'\left(X'X\right)^{-1}
+  \sum_{s}X_{s}'\Omega_{s}X_{s}\left(X'X\right)^{-1}\ell
+  =\tilde{\ell}'\sum_{s}Q_{s}'\Omega_{s}Q_{s}
+  \tilde{\ell}.
+\end{equation*}
+
+## Variance estimate
+
+We estimate $V$ using a variance estimator that generalizes the HC2 variance
+estimator to clustering. Relative to the LZ2 estimator described in @ImKo16, we use a
+slight modification that allows for fixed effects:
+\begin{equation*}
+  \hat{V}=\ell'(X'X)^{-1}\sum_{s}^{}X'_{s}{A}_{s}\hat{u}_{s}\hat{u}_{s}'
+  {A}_{s}'X_{s}(X'X)^{-1}\ell
+  =\ell'R^{-1}\sum_{s}^{}Q'_{s}{A}_{s}\hat{u}_{s}\hat{u}_{s}'
+  {A}_{s}'Q_{s}{R'}^{-1}\ell
+  =\sum_{s=1}^{S}(\hat{u}_{s}'a_{s})^{2},
+\end{equation*}
+where
+\begin{equation*}
+  \hat{u}_{s}:=Y_{s}-X_{s}\hat{\beta}
+  =u_{s}-Q_{s}Q'u,\qquad
+   a_{s}={A}_{s}'Q_{s}\tilde{\ell},
+\end{equation*}
+and the matrix $A_{s}$ is given by the symmetric square root of the inverse of
+$I-Q_{s}Q_{s}'$, or else its pseudo-inverse if it is singular, as is the case,
+for example, if $X$ contains fixed effects. We do not need to insist on
+$I-Q_{s}Q_{s}'$ to be invertible, since, using the identity
+\begin{equation*}
+  \hat{V}=u\sum_{s}(I-QQ')_{s}'a_{s}a_{s}'(I-QQ')_{s} u,
+\end{equation*}
+one can verify by simple algebra that a sufficient condition for $\hat{V}$ to be
+unbiased under homoskedasticity is that
+$Q_{s}'A_{s}(I-Q_{s}Q_{s}')A_{s}Q_{s}=Q_{s}'Q_{s}$ (see, for example,
+@PuTi18, for details).
+
+If the observations are independent, the vector of leverages
+$(Q_{1}'Q_{1},\dotsc,Q_{n}'Q_{n})$ can be computed dirrectly using the
+`stats::hatvalues` function. In this case, use this function to compute
+$A_{i}=1/\sqrt{1-Q_{i}'Q_{i}}$ directly, and we then compute
+$a_{i}=A_{i}Q_{i}'\tilde{\ell}$ using vector operations. For the case with
+clustering, computing the spectral decomposition of $I-Q_{s}Q_{s}'$ can be
+expensive or even infeasible if the cluster size $n_s$ is large. We therefore
+use the following result, suggested to us by Ulrich Müller, allows us to compute
+$a_{s}$ by computing a spectral decomposition of a $p\times p$ matrix.
+
+-  Let $Q_{s}'Q_{s}=\sum_{i=1}^{p}\lambda_{is}r_{is}r_{is}'$ be the spectral
+   decomposition of $Q_{s}'Q_{s}$. Then $A_{s}=\sum_{i\colon \lambda_{i}\neq
+   1}(1-\lambda_{i})^{-1/2}Q_{s}r_{is}r_{is}'Q_{s}'$, satisfies
+   $A_{s}(I-Q_{s}Q_{s}')A_{s}=I$.
+
+   This follows from the fact that $I-Q_{s}Q_{s}'$ has eigenvalues
+   $1-\lambda_{is}$ and eigenvectors $Q_{s}r_{is}$, and hence its pseudoinverse
+   is $\sum_{i\colon \lambda_{i}\neq
+   1}(1-\lambda_{i})^{-1}Q_{s}r_{is}r_{is}'Q_{s}'$.
+
+Using the lemma, we can compute $a_{s}$ efficiently as:
+\begin{equation*}
+  a_{s}
+  =
+  \sum_{i\colon \lambda_{i}\neq
+    1}(1-\lambda_{i})^{-1/2}Q_{s}r_{is}r_{is}'Q_{s}'Q_{s}\tilde{\ell}
+  =Q_{s}D_{s}
+  \tilde{\ell},\qquad D_{s}=\sum_{i\colon \lambda_{i}\neq
+    1}\lambda_{i}(1-\lambda_{i})^{-1/2}r_{is}r_{is}'.
+\end{equation*}
+
+## Degrees of freedom correction
+
+Let $G$ be an $n\times S$ matrix with columns $(I-QQ')_{s}'a_{s}$. Then the
+@BeMc02 adjustment sets the degrees of freedom to
+\begin{equation*}
+  f_{\text{BM}}=\frac{\trace(G'G)^{2}}{\trace((G'G)^{2})}.
+\end{equation*}
+Since $(G'G)_{st}=a_{s}'(I-QQ')_{s}(I-QQ)_{t}'a_{t}=a_{s}(\1{s=t}-Q_{s}Q_{t}')a_{t}$,
+the matrix $G'G$ can be efficiently computed as
+\begin{equation*}
+  G'G=\diag(a_{s}'a_{s})-BB'\qquad B_{sk}=a_{s}'Q_{sk}.
+\end{equation*}
+Note that $B$ is an $S\times p$ matrix, so that computing the degrees of freedom
+adjustment only involves $p\times p$ matrices:
+\begin{align*}
+  f_{\text{BM}}=\frac{(\sum_{s}a_{s}'a_{s}-\sum_{s,k}B_{sk}^{2})^{2}}{
+  \sum_{s}(a_{s}'a_{s})^{2}-2\sum_{s,k}(a_{s}'a_{s})B_{sk}^{2}+\sum_{s,t}(B_{s}'B_{t})^{2}
+  }.
+\end{align*}
+If the observations are independent, we compute $B$ directly as `B <- a*Q`,
+and since $a_{i}$ is a scalar, we have
+\begin{equation*}
+  f_{\text{BM}}=\frac{(\sum_{i}a_{i}^{2}-\sum_{sk}B_{sk}^{2})^{2}}{
+    \sum_{i}a_{i}^{4}-2\sum_{i}a_{i}^{2}B_{i}'B_{i}+\sum_{i, j}(B_{i}'B_{j})^{2}}.
+\end{equation*}
+
+The @ImKo16 degrees of freedom adjustment instead sets
+\begin{equation*}
+  f_{IK}=\frac{\trace({G}'\hat{\Omega}
+    G)^{2}}{\trace(({G}'\hat{\Omega}
+    G)^{2})},
+\end{equation*}
+
+where $\hat{\Omega}$ is an estimate of the @moulton86 model of the
+covariance matrix, under which
+$\Omega_{s}=\sigma_{\epsilon}^{2}I_{n_{s}}+\rho\iota_{n_{s}}\iota_{n_{s}}'$.
+Using simple algebra, one can show that in this case,
+\begin{equation*}
+  G'\Omega G=\sigma_{\epsilon}^{2}\diag(a_{s}'a_{s}) -\sigma_{\epsilon}^{2}BB'+\rho (D-BF')(D-BF')',
+\end{equation*}
+where
+\begin{equation*}
+ F_{sk}=\iota_{n_{s}}'Q_{sk},\qquad D=\diag(a_{s}'\iota_{n_{s}})
+\end{equation*}
+which can again be computed even if the clusters are large. The estimate
+$\hat{\Omega}$ replaces $\sigma_{\epsilon}^{2}$ and $\rho$ with analong
+estimates.

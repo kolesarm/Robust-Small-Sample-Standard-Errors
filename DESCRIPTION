@@ -1,17 +1,27 @@
 Package: dfadjust
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Degrees of Freedom Adjustment for Robust Standard Errors
+Version: 0.1.0
 Authors@R:
-    person(given = "First",
-           family = "Last",
+    person(given = "Michal",
+           family = "Kolesár",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "kolesarmi@googlemail.com",
+           comment = c(ORCID = "0000-0002-2482-7796"))
+Description: Computes small-sample degrees of freedom adjustment for
+    heteroskedasticity robust standard errors, and for clustered standard
+    errors in linear regression.
+Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Suggests:
+    testthat (>= 2.1.0),
+    sandwich,
+    knitr,
+    rmarkdown
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
-Suggests:
-    testthat (>= 2.1.0)
+URL: https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors
+BugReports: https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors/issues
+Language: en-US
+VignetteBuilder: knitr

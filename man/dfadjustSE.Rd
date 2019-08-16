@@ -4,7 +4,8 @@
 \alias{dfadjustSE}
 \title{Standard Errors with adjusted degrees of freedom}
 \usage{
-dfadjustSE(model, clustervar = NULL, ell = NULL, IK = TRUE)
+dfadjustSE(model, clustervar = NULL, ell = NULL, IK = TRUE,
+  tol = 1e-09)
 }
 \arguments{
 \item{model}{Fitted model returned by the \code{\link{lm}} function}
@@ -22,6 +23,8 @@ regressor coefficient}
 being computed. Specifies whether to compute the degrees-of-freedom
 adjustment using the Imbens-Kolesár method (if \code{TRUE}), or the
 Bell-McCaffrey method (if \code{FALSE})}
+
+\item{tol}{Numerical tolerance for determining whether an eigenvalue equals zero.}
 }
 \value{
 Returns a list with the following components \describe{
@@ -36,7 +39,7 @@ called LZ2 in Imbens and Kolesár.}
 
 \item{se}{Standard error}
 
-\item{adj.se}{Adjusted standard errors. For \beta_j, they are defined as
+\item{adj.se}{Adjusted standard errors. For \eqn{\beta_j}, they are defined as
 \code{adj.se[j]=sqrt(vcov[j,j]se*qt(0.975,df=dof)} so that the Bell-McCaffrey
 confidence intervals are given as \code{coefficients(fm)[j] +- 1.96* adj.se=}}
 
@@ -47,4 +50,16 @@ STATA}
 }
 \description{
 Standard Errors with adjusted degrees of freedom
+}
+\examples{
+## No clustering:
+set.seed(42)
+x <- sin(1:10)
+y <- rnorm(10)
+fm <- lm(y~x)
+dfadjustSE(fm)
+## Clustering, defining the first six observations to be in cluster 1, the
+#next two in cluster 2, and the last three in cluster three.
+clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
+dfadjustSE(fm, clustervar)
 }

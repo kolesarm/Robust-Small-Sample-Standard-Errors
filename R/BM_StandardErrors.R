@@ -1,5 +1,7 @@
-## TODO: HC2 when diaghat = 1, X must be full rank, X has one column, X is just the intercept
-## TODO: If each observation in its cluster, we get HC2, TODO: negative rho
+## TODO: HC2 when diaghat = 1, X must be full rank, X has one column, X is just
+## the intercept TODO: If each observation in its cluster, we get HC2, TODO:
+## negative rho TODO: example with few treated, with few treated clusters, and
+## with fixed effects. Check partialling out doesn't affect anything.
 
 #' Standard Errors with adjusted degrees of freedom
 #' @param model Fitted model returned by the \code{\link{lm}} function
@@ -14,6 +16,7 @@
 #'     being computed. Specifies whether to compute the degrees-of-freedom
 #'     adjustment using the Imbens-Kolesár method (if \code{TRUE}), or the
 #'     Bell-McCaffrey method (if \code{FALSE})
+#' @param tol Numerical tolerance for determining whether an eigenvalue equals zero.
 #' @return Returns a list with the following components \describe{
 #'
 #' \item{vcov}{Variance-covariance matrix estimator. For the case without
@@ -26,7 +29,7 @@
 #'
 #' \item{se}{Standard error}
 #'
-#' \item{adj.se}{Adjusted standard errors. For \beta_j, they are defined as
+#' \item{adj.se}{Adjusted standard errors. For \eqn{\beta_j}, they are defined as
 #' \code{adj.se[j]=sqrt(vcov[j,j]se*qt(0.975,df=dof)} so that the Bell-McCaffrey
 #' confidence intervals are given as \code{coefficients(fm)[j] +- 1.96* adj.se=}}
 #'
@@ -50,7 +53,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9) {
     Q <- qr.Q(model$qr)
     R <- qr.R(model$qr)
     n <- NROW(Q)
-    u <- residuals(model)
+    u <- stats::residuals(model)
     K <- model$rank
     ## Moulton estimates
     rho <- sig <- NA
@@ -60,7 +63,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9) {
     ## no clustering
     if(is.null(clustervar)) {
         ## Compute meat of HC1 and HC2
-        diaghat <- try(hatvalues(model), silent = TRUE)
+        diaghat <- try(stats::hatvalues(model), silent = TRUE)
         AQ <- (1-diaghat >= tol) * (1/sqrt(pmax(1-diaghat, tol))) * Q
         HC2 <- crossprod(u * AQ)
         HC1 <- n/(n-K)*crossprod(u*Q)
@@ -134,6 +137,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9) {
     names(dof) <- names(se) <- names(se.Stata) <- colnames(Vhat) <-
         rownames(Vhat) <- names(model$coefficients)
 
-    list(vcov=Vhat, dof=dof, adj.se=se*qt(0.975, df=dof)/qnorm(0.975),
-                se=se, se.Stata=se.Stata, rho=rho, sig=sig)
+    list(vcov=Vhat, dof=dof,
+         adj.se=se*stats::qt(0.975, df=dof)/stats::qnorm(0.975),
+         se=se, se.Stata=se.Stata, rho=rho, sig=sig)
 }
