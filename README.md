@@ -1,5 +1,4 @@
-<!-- [![Travis build status](https://travis-ci.org/kolesarm/RDHonest.svg?branch=master)](https://travis-ci.org/kolesarm/RDHonest) [![Coverage sta -->
-<!-- tus](https://codecov.io/gh/kolesarm/RDHonest/branch/master/graph/badge.svg)](https://codecov.io/github/kolesarm/RDHonest?branch=master) -->
+[![Travis build status](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors.svg?branch=master)](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master)
 
 # dfadjust
 
