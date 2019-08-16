@@ -34,8 +34,8 @@ knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",
 ```{r setup}
 library(dfadjust)
 ```
-The implementation, described below, allows for fixed effects and for large clusters. Example:
-
+The implementation, described below, allows for fixed effects and for large clusters. Examples: TODO
+<!-- TODO: example with few treated, with few treated clusters, and with fixed effects, and with large clusters -->
 
 # Methods
 
