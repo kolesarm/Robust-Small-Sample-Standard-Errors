@@ -5,46 +5,49 @@
 \title{Standard Errors with adjusted degrees of freedom}
 \usage{
 dfadjustSE(model, clustervar = NULL, ell = NULL, IK = TRUE,
-  tol = 1e-09)
+  tol = 1e-09, rho0 = FALSE)
 }
 \arguments{
-\item{model}{Fitted model returned by the \code{\link{lm}} function}
+\item{model}{Fitted model returned by the \code{lm} function}
 
 \item{clustervar}{Factor variable that defines clusters. If \code{NULL} (or
 not supplied), the command computes heteroscedasticity-robust standard
 errors, rather than cluster-robust standard errors.}
 
 \item{ell}{A vector of the same length as the dimension of covariates,
-specifying which linear combination \eqn{\ell'\beta} of coefficients
-\eqn{\beta} to compute. If \code{NULL}, compute standard errors for each
-regressor coefficient}
+specifying which linear combination \eqn{\ell'\beta}{ell'beta} of
+coefficients \eqn{\beta}{beta} to compute. If \code{NULL}, compute
+standard errors for each regressor coefficient.}
 
-\item{IK}{Logical flag only relevant if cluster-robust standard errors are
-being computed. Specifies whether to compute the degrees-of-freedom
-adjustment using the Imbens-Kolesár method (if \code{TRUE}), or the
-Bell-McCaffrey method (if \code{FALSE})}
+\item{IK}{Only relevant for cluster-robust standard errors. Specifies whether
+to compute the degrees-of-freedom adjustment using the Imbens-Kolesár
+(2016) method (if \code{TRUE}), or the Bell-McCaffrey (2002) method (if
+\code{FALSE}).}
 
-\item{tol}{Numerical tolerance for determining whether an eigenvalue equals zero.}
+\item{tol}{Numerical tolerance for determining whether an eigenvalue equals
+zero.}
+
+\item{rho0}{Impose positive \eqn{\rho}{rho} when estimating the Moulton
+(1986) model when implementing the \code{IK} method?}
 }
 \value{
 Returns a list with the following components \describe{
 
-\item{vcov}{Variance-covariance matrix estimator. For the case without
-clustering, it corresponds to the HC2 estimator (see MacKinnon and White,
-1985 and the reference manual for the \code{sandwich} package). For the case
-with clustering, it corresponds to a generalization of the HC2 estimator,
-called LZ2 in Imbens and Kolesár.}
+\item{vcov}{Variance-covariance matrix estimator. For independent errors, it
+corresponds to the HC2 estimator (see MacKinnon and White, 1985 and the
+reference manual for the \code{sandwich} package). For clustered errors, it
+corresponds to a version the generalization of the HC2 estimator, called LZ2
+in Imbens and Kolesár.}
 
-\item{dof}{Degrees-of-freedom adjustment}
+\item{coefficients}{Matrix of estimated coefficients, along with HC1, and HC2
+standard errors, Adjusted standard errors, and effective defrees of freedom.
+Adjusted standard error is HC2 standard error multiplied by \code{qt(0.975,
+df=dof)/qnorm(0.975)} so that one can construct 95% confidence intervals by
+adding and subtracting 1.96 times the adjusted standard error.}
 
-\item{se}{Standard error}
-
-\item{adj.se}{Adjusted standard errors. For \eqn{\beta_j}, they are defined as
-\code{adj.se[j]=sqrt(vcov[j,j]se*qt(0.975,df=dof)} so that the Bell-McCaffrey
-confidence intervals are given as \code{coefficients(fm)[j] +- 1.96* adj.se=}}
-
-\item{se.Stata}{Square root of the cluster-robust variance estimator used in
-STATA}
+\item{rho, sig}{Estimates of \eqn{\rho} and \eqn{\sigma} of the Moulton
+(1986) model for the regression errors. Only computed if \code{IK} method is
+used}
 
 }
 }
@@ -54,12 +57,28 @@ Standard Errors with adjusted degrees of freedom
 \examples{
 ## No clustering:
 set.seed(42)
-x <- sin(1:10)
-y <- rnorm(10)
-fm <- lm(y~x)
+x <- sin(1:100)
+y <- rnorm(100)
+fm <- lm(y ~ x + I(x^2))
 dfadjustSE(fm)
-## Clustering, defining the first six observations to be in cluster 1, the
-#next two in cluster 2, and the last three in cluster three.
-clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
+## Clustering, with 5 clusters
+clustervar <- as.factor(c(rep(1, 40), rep(1, 20),
+                        rep(2, 20), rep(3, 10), rep(4, 10)))
 dfadjustSE(fm, clustervar)
+}
+\references{
+{
+
+\cite{Robert M. Bell and Daniel F. McCaffrey. Bias reduction in standard
+errors for linear regression with multi-stage samples. Survey Methodology,
+28(2):169–181, 2002.}
+
+\cite{Guido W. Imbens and Michal Kolesár. Robust standard errors in small
+samples: Some practical advice. Review of Economics and Statistics,
+98(4):701–712, October 2016.}
+
+\cite{Brent R. Moulton. Random group effects and the precision of regression
+estimates. Journal of Econometrics, 32(3):385–397, 1986.}
+
+}
 }

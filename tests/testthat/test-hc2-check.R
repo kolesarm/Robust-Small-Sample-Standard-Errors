@@ -11,7 +11,8 @@ test_that("HC1 and HC2 formulas match sandwich", {
     r <- dfadjustSE(fm)
 
     expect_lt(max(abs(r$vcov-HC2)), 100*.Machine$double.eps)
-    expect_lt(max(abs(r$se.Stata-sqrt(diag(HC1)))), 100*.Machine$double.eps)
+    expect_lt(max(abs(r$coefficients[, "HC1 se"]-sqrt(diag(HC1)))),
+              100*.Machine$double.eps)
 })
 
 
@@ -21,7 +22,6 @@ test_that("New implementation matches old", {
 MatSqrtInverse <- function(A) {
 
     ei <- eigen(A, symmetric=TRUE)
-
     if (min(ei$values) <= 0)
         warning("Gram matrix doesn't appear to be positive definite")
 
@@ -70,7 +70,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 
         ## HC2
         tXs <- function(s) {
-            Xs <- X[clustervar==s, , drop=FALSE]
+            Xs <- X[clustervar==s, , drop=FALSE] #nolint
             MatSqrtInverse(diag(NROW(Xs))-Xs%*% XXinv %*% t(Xs)) %*% Xs
         }
         tX <- lapply(levels(clustervar), tXs) # list of matrices
@@ -81,10 +81,10 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 
         ## DOF adjustment
         tHs <- function(s) {
-            Xs <- X[clustervar==s, , drop=FALSE]
+            Xs <- X[clustervar==s, , drop=FALSE] #nolint
             index <- which(clustervar==s)
             ss <- outer(rep(0, n), index)     # n x ns matrix of 0
-            ss[cbind(index, 1:length(index))] <- 1
+            ss[cbind(index, seq_along(index))] <- 1
             ss-X %*% XXinv %*% t(Xs)
         }
         tH <- lapply(levels(clustervar), tHs) # list of matrices
@@ -139,33 +139,72 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
                      cl=as.factor(c(rep(1, 60), rep(2, 20), rep(3, 20)))),
                data.frame(y=rnorm(100)+cl3,
                      x=cbind(sin(1:100), rnorm(100)),
-                     cl=as.factor(cl3))
-               )
+                     cl=as.factor(cl3)))
+    ep <- 50*.Machine$double.eps
     for (j in seq_along(d0)) {
         fm <- lm(y~x.1+x.2, data=d0[[j]])
 
         ## No clustering
         r <- dfadjustSE(fm)
         rold <- BMlmSE(fm)
-        expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$dof-rold$dof)), 500*.Machine$double.eps)
-        expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$vcov-rold$vcov)), ep)
+        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), 10*ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
+
+        ## If each observation in its cluster, we get HC2
+        cl <- as.factor(seq_along(fm$model$y))
+        expect_lt(max(abs(dfadjustSE(fm, cl, IK=FALSE)$coefficients-
+                                        r$coefficients)), 10*ep)
+
         ## Clustering
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=FALSE)
         rold <- BMlmSE(fm, d0[[j]]$cl, IK=FALSE)
-        expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$se.Stata-rold$se.Stata)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$vcov-rold$vcov)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)),
+                  ep)
+        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
 
-        r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE)
+        r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, rho0=TRUE)
         rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE)
-        expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
-        expect_lt(max(abs(r$se.Stata-rold$se.Stata)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$vcov-rold$vcov)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
+        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
+
+        r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0), rho0=TRUE)
+        rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0))
+        expect_lt(max(abs(r$vcov-rold$vcov)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
+        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
     }
+
+    r <- dfadjustSE(lm(d0[[3]]$y~1))
+    rold <- BMlmSE(lm(d0[[3]]$y~1))
+    expect_lt(max(abs(r$vcov-rold$vcov)), ep)
+    expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), 10*ep)
+    expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+    expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
+    expect_equal(capture.output(print(r, digits=3))[4],
+                 "(Intercept)     1.64  0.128  0.128    0.13 99 9.05e-37")
+
+    ## Noninvertible cases
+    d0[[3]]$x.3 <- FALSE
+    d0[[3]]$x.3[1] <- TRUE
+    fm1 <- lm(y~x.1+x.2+x.3, data=d0[[3]])
+    r <- dfadjustSE(fm1)
+    r0 <- dfadjustSE(lm(y~x.1+x.2, data=d0[[3]]))
+    expect_lt(max(abs(r0$coefficients[, 1:4]-r$coefficients[1:3, 1:4])),
+              0.05)
+    expect_true(all(is.nan(BMlmSE(fm1)$se)))
+    ## Fixed effects: here minimum eigenvalue is only numerically positive
+    d0[[1]]$x <- c(rep(1, 4), rep(0, 5), 1)
+    fm2 <- lm(y~x+cl, data=d0[[1]])
+    p <- dfadjustSE(fm2, d0[[1]]$cl)$coefficients[, "Adj. se"]
+    expect_lt(max(abs(BMlmSE(fm2, d0[[1]]$cl)$adj.se-p)), 1e-6)
 })
