@@ -130,26 +130,42 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 
 
     set.seed(42)
-    y <- rnorm(10)
-    x <- cbind(sin(1:10), cos(2:11))
-    clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
-    fm <- lm(y~x)
+    cl3 <- c(rep(1, 60), rep(2, 20), rep(3, 20))
+    d0 <- list(data.frame(y=rnorm(10),
+                     x=cbind(sin(1:10), cos(2:11)),
+                     cl=as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))),
+               data.frame(y=rnorm(100),
+                     x=cbind(sin(1:100), rnorm(100)),
+                     cl=as.factor(c(rep(1, 60), rep(2, 20), rep(3, 20)))),
+               data.frame(y=rnorm(100)+cl3,
+                     x=cbind(sin(1:100), rnorm(100)),
+                     cl=as.factor(cl3))
+               )
+    for (j in seq_along(d0)) {
+        fm <- lm(y~x.1+x.2, data=d0[[j]])
 
-    ## No clustering
-    r <- dfadjustSE(fm)
-    rold <- BMlmSE(fm)
-    expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
-    expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
-    expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
-    expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
-    ## Clustering
-    r <- dfadjustSE(fm, clustervar)
-    rold <- BMlmSE(fm, clustervar)
-    expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
-    expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
-    ## expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
-    ## expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
-    ## TODO: IK
+        ## No clustering
+        r <- dfadjustSE(fm)
+        rold <- BMlmSE(fm)
+        expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$dof-rold$dof)), 500*.Machine$double.eps)
+        expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
+        ## Clustering
+        r <- dfadjustSE(fm, d0[[j]]$cl, IK=FALSE)
+        rold <- BMlmSE(fm, d0[[j]]$cl, IK=FALSE)
+        expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$se.Stata-rold$se.Stata)), 50*.Machine$double.eps)
 
-
+        r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE)
+        rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE)
+        expect_lt(max(abs(r$vcov-rold$vcov)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$se-rold$se)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$dof-rold$dof)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$adj.se-rold$adj.se)), 50*.Machine$double.eps)
+        expect_lt(max(abs(r$se.Stata-rold$se.Stata)), 50*.Machine$double.eps)
+    }
 })

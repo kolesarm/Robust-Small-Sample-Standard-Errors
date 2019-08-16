@@ -1,12 +1,5 @@
-tol <- 1e-9
-
 ## TODO: HC2 when diaghat = 1, X must be full rank, X has one column, X is just the intercept
-## TODO: If each observation in its cluster, we get HC2
-
-## Compute DoF given G'*Omega*G without calling eigen as suggested by
-## Winston Lin. sum(GG * GG) = sum(diag(GG %*% GG))
-df <- function(GG)
-    sum(diag(GG))^2 / sum(GG * GG)
+## TODO: If each observation in its cluster, we get HC2, TODO: negative rho
 
 #' Standard Errors with adjusted degrees of freedom
 #' @param model Fitted model returned by the \code{\link{lm}} function
@@ -53,12 +46,14 @@ df <- function(GG)
 #' clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
 #' dfadjustSE(fm, clustervar)
 #' @export
-dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
+dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9) {
     Q <- qr.Q(model$qr)
     R <- qr.R(model$qr)
     n <- NROW(Q)
     u <- residuals(model)
     K <- model$rank
+    ## Moulton estimates
+    rho <- sig <- NA
 
     sandwich <- function(meat) backsolve(R, t(backsolve(R, meat)))
 
@@ -72,74 +67,59 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 
         ## G'*G
         df0 <- function (ell) {
-            lt <- backsolve(R, ell, transpose=TRUE)
-            a <-  drop(AQ %*% lt)
+            a <-  drop(AQ %*% backsolve(R, ell, transpose=TRUE))
             B <- a*Q
-            num <- (sum(a^2)-sum(B^2))^2
-            den <- sum(a^4)-2*sum((a*B)^2)+sum(crossprod(B)^2)
-            num/den
+             (sum(a^2)-sum(B^2))^2 /
+                 (sum(a^4)-2*sum((a*B)^2)+sum(crossprod(B)^2))
         }
-        ## GOG <- function(ell) {
-        ##     lt <- backsolve(R, ell, transpose=TRUE)
-        ##     a <-  drop(AQ %*% lt)
-        ##     diag(a^2)-tcrossprod(a * Q)
-        ## }
     } else {
         if(!is.factor(clustervar)) stop("'clustervar' must be a factor")
-
-        sum.model <- summary.lm(model)
-        XXinv <- sum.model$cov.unscaled # XX^{-1}
 
         ## Compute meat of HC1 and HC2
         S <- length(levels(clustervar)) # number of clusters
         uj <- apply(u*Q, 2, function(x) tapply(x, clustervar, sum))
         HC1 <- S/(S-1) * (n-1)/(n-K) * crossprod(uj)
-        as <- function(s) {
+        AQf <- function(s) {
             Qs <- Q[clustervar==s, , drop=FALSE]
             e <- eigen(crossprod(Qs))
             Ds <- e$vectors %*% ((1-e$values >= tol) *
                                  (1/sqrt(pmax(1-e$values, tol))) * t(e$vectors))
-            crossprod(crossprod(u[clustervar==s],  Qs %*% Ds))
+            Qs %*% Ds
         }
-        HC2 <- Reduce("+", lapply(levels(clustervar), as)) # list of matrices
+        AQ <- lapply(levels(clustervar), AQf) # list of matrices
+        AQ <- do.call(rbind, AQ)
+        uj <- apply(u*AQ, 2, function(x) tapply(x, clustervar, sum))
+        HC2 <- crossprod(uj)
 
-        ## ## DOF adjustment
-        ## tHs <- function(s) {
-        ##     Xs <- X[clustervar==s, , drop=FALSE]
-        ##     index <- which(clustervar==s)
-        ##     ss <- outer(rep(0, n), index)     # n x ns matrix of 0
-        ##     ss[cbind(index, 1:length(index))] <- 1
-        ##     ss-X %*% XXinv %*% t(Xs)
-        ## }
-        ## tH <- lapply(levels(clustervar), tHs) # list of matrices
+        if (IK) {
+            ## Moulton estimates
+            ssr <- sum(u^2)
+            rho <- (sum(tapply(u, clustervar, sum)^2)-ssr) /
+                (sum(tapply(u, clustervar, length)^2)-n)
+            ## Don't allow for negative correlation
+            rho <- max(rho, 0)
+            sig <- max(ssr/n - rho, 0)
+        }
 
-        ## Moulton <- function() {
-        ##     ## Moulton estimates
-        ##     ns <- tapply(u, clustervar, length)
-        ##     ssr <- sum(u^2)
-        ##     rho <- max((sum(sapply(seq_along(tu), function(i)
-        ##         sum(tu[[i]] %o% tu[[i]])))-ssr) / (sum(ns^2)-n), 0)
-        ##     c(sig.eps=max(ssr/n - rho, 0), rho=rho)
-        ## }
-
-        ## GOG <- function(ell) {
-        ##     G <- sapply(seq_along(tX),
-        ##                 function(i)  tH[[i]] %*% tX[[i]] %*% XXinv %*% ell)
-        ##     GG <- crossprod(G)
-
-        ##     ## IK method
-        ##     if (IK==TRUE) {
-        ##         Gsums <- apply(G, 2,
-        ##                        function(x) tapply(x, clustervar, sum)) # Z'*G
-        ##         GG <- Moulton()[1]*GG + Moulton()[2]*crossprod(Gsums)
-        ##     }
-        ##     GG
-        ## }
-        df0 <- function(ell) Inf
+        df0 <- function(ell) {
+            a <-  drop(AQ %*% backsolve(R, ell, transpose=TRUE))
+            as <- as.vector(tapply(a^2, clustervar, sum))
+            B  <- apply(a*Q, 2, function(x) tapply(x, clustervar, sum))
+            if (!IK) {
+                (sum(as)-sum(B^2))^2 /
+                    (sum(as^2)-2*sum(as*B^2)+sum(crossprod(B)^2))
+            } else {
+                D <- as.vector(tapply(a, clustervar, sum))
+                F  <- apply(Q, 2, function(x) tapply(x, clustervar, sum))
+                GG <- sig*(diag(as)-tcrossprod(B)) +
+                    rho*tcrossprod(diag(D)-tcrossprod(B, F))
+                sum(diag(GG))^2 / sum(GG^2)
+            }
+        }
     }
+
     Vhat <- sandwich(HC2)
     Vhat.Stata <- sandwich(HC1)
-
 
     if (!is.null(ell)) {
         se <- drop(sqrt(crossprod(ell, Vhat) %*% ell))
@@ -155,5 +135,5 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         rownames(Vhat) <- names(model$coefficients)
 
     list(vcov=Vhat, dof=dof, adj.se=se*qt(0.975, df=dof)/qnorm(0.975),
-                se=se, se.Stata=se.Stata)
+                se=se, se.Stata=se.Stata, rho=rho, sig=sig)
 }
