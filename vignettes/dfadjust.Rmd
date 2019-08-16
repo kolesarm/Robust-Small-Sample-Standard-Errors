@@ -3,7 +3,6 @@ output:
   pdf_document:
     citation_package: natbib
     latex_engine: pdflatex
-    template: mk_Rpackage_template.tex
     toc: true
     toc_depth: 2
     includes:
@@ -31,11 +30,68 @@ knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",
 
 # Description
 
+This package implements the small-sample degrees of freedom adjustment discussed
+in @ImKo16. The implementation can handle models with fixed effects, and cases
+where the number of observations or clusters is large [^1].
+
+[^1]: We thank Ulrich Müller for suggesting to us the lemma below
+
 ```{r setup}
 library(dfadjust)
+options(digits=3)
 ```
-The implementation, described below, allows for fixed effects and for large clusters. Examples: TODO
-<!-- TODO: example with few treated, with few treated clusters, and with fixed effects, and with large clusters -->
+
+To give some examples, let us construct an artificial dataset with 11 clusters
+```{r}
+set.seed(7)
+d1 <- data.frame(y=rnorm(1000), x1=c(rep(1, 3), rep(0, 997)),
+                 x2=c(rep(1, 150), rep(0, 850)),
+                 x3=rnorm(1000),
+                 cl=as.factor(c(rep(1:10, each=50), rep(11, 500))))
+```
+
+Let us first run a regression of `y` on `x1`. This is a case where in spite of
+moderate data size, the effective number of observations is small since there
+are only three treated units:
+
+```{r}
+r1 <- lm(y~x1, data=d1)
+## No clustering
+dfadjustSE(r1)
+```
+
+Now consider a cluster-robust regression of `y` on `x2`. There are
+only 3 treated clusters, so the effective number of observations is again small:
+
+```{r}
+r1 <- lm(y~x2, data=d1)
+# Default Imbens-Kolesár method
+dfadjustSE(r1, clustervar=d1$cl)
+# Bell-McCaffrey method
+dfadjustSE(r1, clustervar=d1$cl, IK=FALSE)
+```
+
+Now, let us run a regression of `y` on `x3`, with fixed effects. Since we're
+only interested in `x3`, we specify that we only want inference on the second
+element:
+
+```{r}
+r1 <- lm(y~x3+cl, data=d1)
+dfadjustSE(r1, clustervar=d1$cl, ell=c(0, 1, rep(0, r1$rank-2)))
+dfadjustSE(r1, clustervar=d1$cl, ell=c(0, 1, rep(0, r1$rank-2)), IK=FALSE)
+```
+
+Finally, an example in which the clusters are large. We have 500,000 observations:
+```{r}
+d2 <- do.call("rbind", replicate(500, d1, simplify = FALSE))
+d2$y <- rnorm(length(d2$y))
+r2 <- lm(y~x2, data=d2)
+summary(r2)
+# Default Imbens-Kolesár method
+dfadjustSE(r2, clustervar=d2$cl)
+# Bell-McCaffrey method
+dfadjustSE(r2, clustervar=d2$cl, IK=FALSE)
+```
 
 # Methods
 

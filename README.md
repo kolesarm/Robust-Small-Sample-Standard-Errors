@@ -16,19 +16,19 @@ package [manual](doc/manual.pdf) for documentation of the package functions.
 
 ## Installation
 
-You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org) with:
+<!-- You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org) with: -->
+
+<!-- ``` r -->
+<!-- install.packages("dfadjust") -->
+<!-- ``` -->
+
+You can install the package manually by downloading the source code here, or
+using the function `install_github()` from the `devtools` package:
 
 ``` r
-install.packages("dfadjust")
+install.packages("devtools") ## if devtools package not installed
+devtools::install_github("https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors")
 ```
-
-<!-- You can install the package manually by downloading the source code here, or -->
-<!-- using the function `install_github()` from the `devtools` package: -->
-
-<!-- ``` -->
-<!-- install.packages("devtools") ## if devtools package not installed -->
-<!-- devtools::install_github("https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors") -->
-<!-- ``` -->
 
 ## Example
 
@@ -39,9 +39,9 @@ x <- sin(1:10)
 y <- rnorm(10)
 fm <- lm(y~x)
 BMlmSE(fm)
-#+end_src
+```
 Clustering:
-#+begin_src R
+``` r
 clustervar <- as.factor(c(rep(1,6),rep(2,2),rep(3,2)))
 dfadjustSE(fm, clustervar)
 ```
