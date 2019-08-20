@@ -20,7 +20,8 @@ Suggests:
     sandwich,
     knitr,
     rmarkdown,
-    spelling
+    spelling,
+    formatR
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 URL: https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors

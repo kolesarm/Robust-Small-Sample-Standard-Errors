@@ -40,7 +40,7 @@ corresponds to a version the generalization of the HC2 estimator, called LZ2
 in Imbens and Kolesár.}
 
 \item{coefficients}{Matrix of estimated coefficients, along with HC1, and HC2
-standard errors, Adjusted standard errors, and effective defrees of freedom.
+standard errors, Adjusted standard errors, and effective degrees of freedom.
 Adjusted standard error is HC2 standard error multiplied by \code{qt(0.975,
 df=dof)/qnorm(0.975)} so that one can construct 95% confidence intervals by
 adding and subtracting 1.96 times the adjusted standard error.}
