@@ -1,6 +1,6 @@
 Package: dfadjust
 Title: Degrees of Freedom Adjustment for Robust Standard Errors
-Version: 0.1.0
+Version: 1.0.0
 Authors@R:
     person(given = "Michal",
            family = "Kolesár",
@@ -8,8 +8,9 @@ Authors@R:
            email = "kolesarmi@googlemail.com",
            comment = c(ORCID = "0000-0002-2482-7796"))
 Description: Computes small-sample degrees of freedom adjustment for
-    heteroskedasticity robust standard errors, and for clustered standard
-    errors in linear regression.
+    heteroskedasticity robust standard errors, and for clustered standard errors
+    in linear regression. See Imbens and Kolesár (1994)
+    <doi:10.1162/REST_a_00552> for a discussion of these adjustments.
 Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8

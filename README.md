@@ -13,22 +13,6 @@ See vignette [dfadjust](doc/dfadjust.pdf) for description of the package
 package [manual](doc/manual.pdf) for documentation of the package functions.
 
 
-## Installation
-
-<!-- You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org) with: -->
-
-<!-- ``` r -->
-<!-- install.packages("dfadjust") -->
-<!-- ``` -->
-
-You can install the package manually by downloading the source code here, or
-using the function `install_github()` from the `devtools` package:
-
-``` r
-install.packages("devtools") ## if devtools package not installed
-devtools::install_github("https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors")
-```
-
 ## Example
 
 No clustering:
@@ -46,3 +30,11 @@ dfadjustSE(fm, clustervar)
 ```
 Here we defined the first six observations to be in cluster 1, the next two in
 cluster 2, and the last three in cluster three.
+
+## Installation
+
+You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("dfadjust")
+```
