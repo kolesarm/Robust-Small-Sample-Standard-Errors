@@ -26,6 +26,7 @@ library("knitr")
 knitr::opts_knit$set(self.contained = FALSE)
 knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",
                       tidy.opts=list(blank=FALSE, width.cutoff=55))
+oldoptions <- options(digits=3)
 ```
 
 # Description
@@ -38,7 +39,6 @@ where the number of observations or clusters is large [^1].
 
 ```{r setup}
 library(dfadjust)
-options(digits=3)
 ```
 
 To give some examples, let us construct an artificial dataset with 11 clusters
@@ -245,5 +245,10 @@ where
 which can again be computed even if the clusters are large. The estimate
 $\hat{\Omega}$ replaces $\sigma_{\epsilon}^{2}$ and $\rho$ with analog
 estimates.
+
+```{r cleanup, include=FALSE}
+options(oldoptions)
+```
+
 
 # References

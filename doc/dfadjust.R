@@ -3,10 +3,10 @@ library("knitr")
 knitr::opts_knit$set(self.contained = FALSE)
 knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",
                       tidy.opts=list(blank=FALSE, width.cutoff=55))
+oldoptions <- options(digits=3)
 
 ## ----setup---------------------------------------------------------------
 library(dfadjust)
-options(digits=3)
 
 ## ------------------------------------------------------------------------
 set.seed(7)
@@ -41,4 +41,7 @@ summary(r2)
 dfadjustSE(r2, clustervar=d2$cl)
 # Bell-McCaffrey method
 dfadjustSE(r2, clustervar=d2$cl, IK=FALSE)
+
+## ----cleanup, include=FALSE----------------------------------------------
+options(oldoptions)
 

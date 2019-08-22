@@ -1,4 +1,4 @@
-[![Travis build status](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors.svg?branch=master)](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master)
+[![Travis build status](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors.svg?branch=master)](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master) [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dfadjust)](https://cran.r-project.org/package=dfadjust)
 
 # dfadjust
 
@@ -37,4 +37,11 @@ You can install the released version of dfadjust from [CRAN](https://CRAN.R-proj
 
 ``` r
 install.packages("dfadjust")
+```
+
+Or, you can get the current the development version from GitHub:
+
+``` r
+install.packages("remotes") # if not installed
+remotes::install_github("dfadjust")
 ```
