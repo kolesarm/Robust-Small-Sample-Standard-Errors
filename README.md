@@ -21,7 +21,7 @@ set.seed(42)
 x <- sin(1:10)
 y <- rnorm(10)
 fm <- lm(y~x)
-BMlmSE(fm)
+dfadjustSE(fm)
 ```
 Clustering:
 ``` r
@@ -39,7 +39,7 @@ You can install the released version of dfadjust from [CRAN](https://CRAN.R-proj
 install.packages("dfadjust")
 ```
 
-Or, you can get the current the development version from GitHub:
+Alternatively, you can get the current the development version from GitHub:
 
 ``` r
 install.packages("remotes") # if not installed
