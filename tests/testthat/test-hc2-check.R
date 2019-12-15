@@ -15,6 +15,14 @@ test_that("HC1 and HC2 formulas match sandwich", {
               100*.Machine$double.eps)
 })
 
+test_that("clustervar must be a factor", {
+    set.seed(42)
+    y <- rnorm(10)
+    x <- cbind(sin(1:10), sin(2:11))
+    fm <- lm(y~x)
+    expect_error(dfadjustSE(fm, clustervar=1:10))
+})
+
 
 test_that("New implementation matches old", {
 
@@ -76,7 +84,8 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         tX <- lapply(levels(clustervar), tXs) # list of matrices
 
         tu <- split(u, clustervar)
-        tutX <- sapply(seq_along(tu), function(i) crossprod(tu[[i]], tX[[i]]))
+        tutX <- vapply(seq_along(tu), function(i) crossprod(tu[[i]], tX[[i]]),
+                       numeric(K))
         Vhat <- sandwich::sandwich(model, meat = tcrossprod(tutX)/n)
 
         ## DOF adjustment
@@ -119,7 +128,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         se.Stata <- drop(sqrt(crossprod(ell, Vhat.Stata) %*% ell))
     } else {
         se <- sqrt(diag(Vhat))
-        dof <- sapply(seq(K), function(k) df(GOG(diag(K)[, k])))
+        dof <- vapply(seq_len(K), function(k) df(GOG(diag(K)[, k])), numeric(1))
         se.Stata <- sqrt(diag(Vhat.Stata))
     }
     names(dof) <- names(se)
@@ -141,6 +150,8 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
                      x=cbind(sin(1:100), rnorm(100)),
                      cl=as.factor(cl3)))
     ep <- 50*.Machine$double.eps
+    ## Increase numerical tolerance if platform doesn't have long double
+    big_ep <- if (capabilities("long.double")) 10*ep else 10^4*ep
     for (j in seq_along(d0)) {
         fm <- lm(y~x.1+x.2, data=d0[[j]])
 
@@ -148,7 +159,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         r <- dfadjustSE(fm)
         rold <- BMlmSE(fm)
         expect_lt(max(abs(r$vcov-rold$vcov)), ep)
-        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), 10*ep)
+        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), big_ep)
         expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
 
@@ -164,7 +175,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)),
                   ep)
         expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
-        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), big_ep)
         expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
 
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, rho0=TRUE)
@@ -186,7 +197,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 
     r <- dfadjustSE(lm(d0[[3]]$y~1))
     rold <- BMlmSE(lm(d0[[3]]$y~1))
-    expect_lt(max(abs(r$vcov-rold$vcov)), ep)
+    expect_lt(max(abs(r$vcov-rold$vcov)), big_ep)
     expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), 10*ep)
     expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
     expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)

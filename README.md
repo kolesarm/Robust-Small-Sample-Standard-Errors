@@ -25,7 +25,7 @@ dfadjustSE(fm)
 ```
 Clustering:
 ``` r
-clustervar <- as.factor(c(rep(1,6),rep(2,2),rep(3,2)))
+clustervar <- as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))
 dfadjustSE(fm, clustervar)
 ```
 Here we defined the first six observations to be in cluster 1, the next two in
@@ -33,7 +33,7 @@ cluster 2, and the last three in cluster three.
 
 ## Installation
 
-You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org/package=dfadjust) with:
 
 ``` r
 install.packages("dfadjust")

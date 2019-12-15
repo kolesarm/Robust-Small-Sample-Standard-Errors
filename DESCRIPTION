@@ -1,6 +1,6 @@
 Package: dfadjust
 Title: Degrees of Freedom Adjustment for Robust Standard Errors
-Version: 1.0.0.9000
+Version: 1.0.1
 Authors@R:
     person(given = "Michal",
            family = "Kolesár",
@@ -23,7 +23,7 @@ Suggests:
     spelling,
     formatR
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 URL: https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors
 BugReports: https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors/issues
 Language: en-US
