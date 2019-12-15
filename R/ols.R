@@ -81,7 +81,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
         HC1 <- n/(n-K)*crossprod(u*Q)
 
         ## G'*G
-        df0 <- function (ell) {
+        df0 <- function(ell) {
             a <-  drop(AQ %*% backsolve(R, ell, transpose=TRUE))
             B <- a*Q
              (sum(a^2)-sum(B^2))^2 /
@@ -134,22 +134,22 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
     }
 
     Vhat <- sandwich(HC2)
-    Vhat.Stata <- sandwich(HC1)
+    VhatStata <- sandwich(HC1)
 
     if (!is.null(ell)) {
         se <- drop(sqrt(crossprod(ell, Vhat) %*% ell))
         dof <- df0(ell)
-        se.Stata <- drop(sqrt(crossprod(ell, Vhat.Stata) %*% ell))
+        seStata <- drop(sqrt(crossprod(ell, VhatStata) %*% ell))
         beta <- sum(ell*model$coefficients)
     } else {
         se <- sqrt(diag(Vhat))
         dof <- vapply(seq(K), function(k) df0(diag(K)[, k]), numeric(1))
-        se.Stata <- sqrt(diag(Vhat.Stata))
+        seStata <- sqrt(diag(VhatStata))
         beta <-  model$coefficients
     }
 
     r <- cbind("Estimate"=beta,
-               "HC1 se"=se.Stata,
+               "HC1 se"=seStata,
                "HC2 se"=se,
                "Adj. se"=se*stats::qt(0.975, df=dof)/stats::qnorm(0.975),
                "df"=dof)

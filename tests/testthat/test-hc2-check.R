@@ -59,7 +59,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     ## no clustering
     if(is.null(clustervar)) {
         Vhat <- sandwich::vcovHC(model, type="HC2")
-        Vhat.Stata <- Vhat*NA
+        VhatStata <- Vhat*NA
 
         M <- diag(n)-X %*% XXinv %*% t(X)       # annihilator matrix
         ## G'*Omega*G
@@ -73,7 +73,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         ## Stata
         S <- length(levels(clustervar)) # number clusters
         uj <- apply(u*X, 2, function(x) tapply(x, clustervar, sum))
-        Vhat.Stata <- S/(S-1) * (n-1)/(n-K) *
+        VhatStata <- S/(S-1) * (n-1)/(n-K) *
             sandwich::sandwich(model, meat = crossprod(uj)/n)
 
         ## HC2
@@ -125,16 +125,16 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     if (!is.null(ell)) {
         se <- drop(sqrt(crossprod(ell, Vhat) %*% ell))
         dof <- df(GOG(ell))
-        se.Stata <- drop(sqrt(crossprod(ell, Vhat.Stata) %*% ell))
+        seStata <- drop(sqrt(crossprod(ell, VhatStata) %*% ell))
     } else {
         se <- sqrt(diag(Vhat))
         dof <- vapply(seq_len(K), function(k) df(GOG(diag(K)[, k])), numeric(1))
-        se.Stata <- sqrt(diag(Vhat.Stata))
+        seStata <- sqrt(diag(VhatStata))
     }
     names(dof) <- names(se)
 
     list(vcov=Vhat, dof=dof, adj.se=se*qt(0.975, df=dof)/qnorm(0.975),
-                se=se, se.Stata=se.Stata)
+                se=se, seStata=seStata)
 }
 
 
@@ -151,7 +151,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
                      cl=as.factor(cl3)))
     ep <- 50*.Machine$double.eps
     ## Increase numerical tolerance if platform doesn't have long double
-    big_ep <- if (capabilities("long.double")) 10*ep else 10^4*ep
+    bigep <- if (capabilities("long.double")) 10*ep else 10^4*ep
     for (j in seq_along(d0)) {
         fm <- lm(y~x.1+x.2, data=d0[[j]])
 
@@ -159,7 +159,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         r <- dfadjustSE(fm)
         rold <- BMlmSE(fm)
         expect_lt(max(abs(r$vcov-rold$vcov)), ep)
-        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), big_ep)
+        expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), bigep)
         expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
 
@@ -175,7 +175,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)),
                   ep)
         expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
-        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), big_ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), bigep)
         expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
 
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, rho0=TRUE)
@@ -197,7 +197,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 
     r <- dfadjustSE(lm(d0[[3]]$y~1))
     rold <- BMlmSE(lm(d0[[3]]$y~1))
-    expect_lt(max(abs(r$vcov-rold$vcov)), big_ep)
+    expect_lt(max(abs(r$vcov-rold$vcov)), bigep)
     expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), 10*ep)
     expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
     expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
