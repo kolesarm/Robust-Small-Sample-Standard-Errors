@@ -1,3 +1,9 @@
+# dfadjust 1.0.1
+
+## Minor improvements and fixes
+
+- Fix problem with failing tests when platform didn't use long double
+
 # dfadjust 1.0.0
 
 ## New Features

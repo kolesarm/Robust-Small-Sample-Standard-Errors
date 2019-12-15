@@ -198,7 +198,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     r <- dfadjustSE(lm(d0[[3]]$y~1))
     rold <- BMlmSE(lm(d0[[3]]$y~1))
     expect_lt(max(abs(r$vcov-rold$vcov)), bigep)
-    expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), 10*ep)
+    expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), bigep)
     expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
     expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
     expect_equal(capture.output(print(r, digits=3))[4],
