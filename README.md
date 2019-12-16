@@ -43,5 +43,5 @@ Alternatively, you can get the current the development version from GitHub:
 
 ``` r
 install.packages("remotes") # if not installed
-remotes::install_github("dfadjust")
+remotes::install_github("kolesarm/Robust-Small-Sample-Standard-Errors")
 ```
