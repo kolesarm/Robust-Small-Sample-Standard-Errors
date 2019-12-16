@@ -4,7 +4,7 @@
 
 This package implements the small-sample degrees of freedom adjustments for
 robust and cluster-robust standard errors in linear regression described in
-[Imbens and Kolesár (2016)](http://www.mitpressjournals.org/doi/abs/10.1162/REST_a_00552).
+[Imbens and Kolesár (2016)](https://doi.org/10.1162/REST_a_00552).
 
 SAS version by Nicolas Moreau is available [here](http://cemoi.univ-reunion.fr/econometrie-avec-r-et-sas).
 
