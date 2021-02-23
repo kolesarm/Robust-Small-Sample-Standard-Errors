@@ -77,14 +77,15 @@ dfadjustSE(fm, clustervar)
 
 \cite{Robert M. Bell and Daniel F. McCaffrey. Bias reduction in standard
 errors for linear regression with multi-stage samples. Survey Methodology,
-28(2):169–181, 2002.}
+28(2):169–181, December 2002.}
 
 \cite{Guido W. Imbens and Michal Kolesár. Robust standard errors in small
 samples: Some practical advice. Review of Economics and Statistics,
-98(4):701–712, October 2016.}
+98(4):701–712, October 2016. \doi{10.1162/REST_a_00552}}
 
 \cite{Brent R. Moulton. Random group effects and the precision of regression
-estimates. Journal of Econometrics, 32(3):385–397, 1986.}
+estimates. Journal of Econometrics, 32(3):385–397, August 1986.
+\doi{10.1016/0304-4076(86)90021-7}.}
 
 }
 }

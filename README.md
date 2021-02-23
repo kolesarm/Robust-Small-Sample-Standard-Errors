@@ -33,15 +33,18 @@ cluster 2, and the last three in cluster three.
 
 ## Installation
 
-You can install the released version of dfadjust from [CRAN](https://CRAN.R-project.org/package=dfadjust) with:
+You can install the released version of `dfadjust` from
+[CRAN](https://CRAN.R-project.org/package=dfadjust) with:
 
 ``` r
 install.packages("dfadjust")
 ```
 
-Alternatively, you can get the current the development version from GitHub:
+Alternatively, you can get the current development version from GitHub:
 
 ``` r
-install.packages("remotes") # if not installed
+if (!requireNamespace("remotes")) {
+  install.packages("remotes")
+}
 remotes::install_github("kolesarm/Robust-Small-Sample-Standard-Errors")
 ```

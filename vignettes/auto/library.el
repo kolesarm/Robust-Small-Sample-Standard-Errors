@@ -6,6 +6,6 @@
     "BeMc02"
     "PuTi18"
     "moulton86"
-    "satterthwaite_approximate_1946"))
+    "satterthwaite46"))
  :bibtex)
 

@@ -176,7 +176,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
                   ep)
         expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
         expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), bigep)
-        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$seStata)), ep)
 
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, rho0=TRUE)
         rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE)
@@ -184,7 +184,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
         expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
         expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
-        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$seStata)), ep)
 
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0), rho0=TRUE)
         rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0))
@@ -192,7 +192,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
         expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), ep)
         expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
-        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$se.Stata)), ep)
+        expect_lt(max(abs(r$coefficients[, "HC1 se"]-rold$seStata)), ep)
     }
 
     r <- dfadjustSE(lm(d0[[3]]$y~1))

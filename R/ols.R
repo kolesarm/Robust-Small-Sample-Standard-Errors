@@ -38,14 +38,15 @@
 #'
 #' \cite{Robert M. Bell and Daniel F. McCaffrey. Bias reduction in standard
 #' errors for linear regression with multi-stage samples. Survey Methodology,
-#' 28(2):169–181, 2002.}
+#' 28(2):169–181, December 2002.}
 #'
 #' \cite{Guido W. Imbens and Michal Kolesár. Robust standard errors in small
 #' samples: Some practical advice. Review of Economics and Statistics,
-#' 98(4):701–712, October 2016.}
+#' 98(4):701–712, October 2016. \doi{10.1162/REST_a_00552}}
 #'
 #' \cite{Brent R. Moulton. Random group effects and the precision of regression
-#' estimates. Journal of Econometrics, 32(3):385–397, 1986.}
+#' estimates. Journal of Econometrics, 32(3):385–397, August 1986.
+#' \doi{10.1016/0304-4076(86)90021-7}.}
 #'
 #' }
 #' @examples
@@ -89,11 +90,17 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
         }
     } else {
         if(!is.factor(clustervar)) stop("'clustervar' must be a factor")
+        ## Order u, Q by clusters
+        ord <- order(clustervar)
+        u <- u[ord]
+        Q <- Q[ord, ]
+        clustervar <- clustervar[ord]
 
         ## Compute meat of HC1 and HC2
-        S <- length(levels(clustervar)) # number of clusters
+        S <- nlevels(clustervar) # number of clusters
         uj <- apply(u*Q, 2, function(x) tapply(x, clustervar, sum))
         HC1 <- S/(S-1) * (n-1)/(n-K) * crossprod(uj)
+        ## A_s * Q_s
         AQf <- function(s) {
             Qs <- Q[clustervar==s, , drop=FALSE] # nolint
             e <- eigen(crossprod(Qs))
@@ -107,10 +114,13 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
         HC2 <- crossprod(uj)
 
         if (IK) {
-            ## Moulton estimates
+            ## Moulton estimates, set rho=0 if no clustering
             ssr <- sum(u^2)
-            rho <- (sum(tapply(u, clustervar, sum)^2)-ssr) /
-                (sum(tapply(u, clustervar, length)^2)-n)
+            den <- sum(tapply(u, clustervar, length)^2)-n
+            rho <- 0
+            if (den>0)
+                rho <- (sum(tapply(u, clustervar, sum)^2)-ssr) / den
+
             ## Don't allow for negative correlation
             if (rho0) rho <- max(rho, 0)
             sig <- max(ssr/n - rho, 0)

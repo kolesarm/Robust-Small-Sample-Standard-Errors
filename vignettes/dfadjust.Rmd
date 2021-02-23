@@ -8,7 +8,7 @@ output:
     includes:
         in_header: vignette_head.tex
     keep_tex: true
-title: "Robust Standard Errors in Small Samples "
+title: "Robust Standard Errors in Small Samples"
 author: "Michal Kolesár"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 geometry: margin=1in
@@ -179,7 +179,7 @@ $A_{i}=1/\sqrt{1-Q_{i}'Q_{i}}$ directly, and we then compute
 $a_{i}=A_{i}Q_{i}'\tilde{\ell}$ using vector operations. For the case with
 clustering, computing the spectral decomposition of $I-Q_{s}Q_{s}'$ can be
 expensive or even infeasible if the cluster size $n_s$ is large. We therefore
-use the following result, suggested to us by Ulrich Müller, allows us to compute
+use the following result, suggested to us by Ulrich Müller, which allows us to compute
 $a_{s}$ by computing a spectral decomposition of a $p\times p$ matrix.
 
 -  Let $Q_{s}'Q_{s}=\sum_{i=1}^{p}\lambda_{is}r_{is}r_{is}'$ be the spectral
