@@ -1,4 +1,4 @@
-[![Travis build status](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors.svg?branch=master)](https://travis-ci.org/kolesarm/Robust-Small-Sample-Standard-Errors) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master) [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dfadjust)](https://cran.r-project.org/package=dfadjust)
+[![Travis build status](https://travis-ci.com/kolesarm/Robust-Small-Sample-Standard-Errors.svg?branch=master)](https://travis-ci.com/kolesarm/Robust-Small-Sample-Standard-Errors) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master) [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dfadjust)](https://cran.r-project.org/package=dfadjust)
 
 # dfadjust
 

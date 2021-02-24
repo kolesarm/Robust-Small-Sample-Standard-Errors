@@ -1,3 +1,10 @@
+# dfadjust 1.0.2
+
+## Minor improvements and fixes
+
+- Fix incorrect computation of CR2 variance estimator and degrees of freedom
+  adjustment if data not sorted by cluster
+
 # dfadjust 1.0.1
 
 ## Minor improvements and fixes
@@ -10,7 +17,7 @@
 
 - The function `dfadjustSE` implements small-sample degrees of freedom
   adjustment discussed in [Imbens and Kolesár
-  (2016)](http://www.mitpressjournals.org/doi/abs/10.1162/REST_a_00552), using
+  (2016)](https://www.doi.org/10.1162/REST_a_00552), using
   both heteroskedasticity-robust and clustered standard errors. For clustered
   standard errors, the package implements both the Imbens and Kolesár (2016) and
   the Bell and McCaffrey (2002, Survey Methodology) degrees of freedom
