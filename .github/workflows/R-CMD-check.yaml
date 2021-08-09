@@ -25,7 +25,7 @@ jobs:
           - {os: windows-latest, r: 'release'}
           - {os: macOS-latest, r: 'release'}
           - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", http-user-agent: "R/4.1.0 (ubuntu-20.04) R (4.1.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
+          - {os: ubuntu-20.04, r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -41,7 +41,7 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - uses: r-lib/actions/setup-tinytex@master
+      - uses: r-lib/actions/setup-tinytex@v1
 
       - name: Query dependencies
         run: |
@@ -64,7 +64,6 @@ jobs:
           do
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
-
           sudo apt-get install -y ghostscript
       - name: Install Mac OS system dependencies
         if: matrix.config.os == 'macOS-latest'
@@ -77,6 +76,16 @@ jobs:
           remotes::install_cran("rcmdcheck")
           # Install knitr because Ubuntu-release is not finding it for some reason
           remotes::install_cran("formatR", "knitr")
+        shell: Rscript {0}
+
+      - name: Session info
+        run: |
+          options(width = 100)
+          pkgs <- .packages(TRUE)
+          sessioninfo::session_info(pkgs, include_base = TRUE)
+          rmarkdown::find_pandoc()
+          tinytex::tlmgr("--version")
+          tinytex::tl_pkgs()
         shell: Rscript {0}
 
       - name: Check

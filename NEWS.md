@@ -1,3 +1,9 @@
+# dfadjust 1.0.3
+
+## Minor improvements and fixes
+
+- Fix incorrect computation of p-values in the `print.dfadjustSE` method
+
 # dfadjust 1.0.2
 
 ## Minor improvements and fixes

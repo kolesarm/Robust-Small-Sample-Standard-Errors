@@ -11,7 +11,7 @@ Description: Computes small-sample degrees of freedom adjustment for
     heteroskedasticity robust standard errors, and for clustered standard errors
     in linear regression. See Imbens and Kolesár (2016)
     <doi:10.1162/REST_a_00552> for a discussion of these adjustments.
-Depends: R (>= 3.5.0)
+Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
