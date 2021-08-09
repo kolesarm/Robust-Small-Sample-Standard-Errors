@@ -174,8 +174,9 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 #' @export
 print.dfadjustSE <- function(x, digits = getOption("digits"), ...) {
     r2 <- cbind(x$coefficients,
-                "p-value"=2*stats::pnorm(-abs(x$coefficients[, "Estimate"] /
-                                              x$coefficients[, "Adj. se"])))
+                "p-value"=2*stats::pt(-abs(x$coefficients[, "Estimate"] /
+                                           x$coefficients[, "HC2 se"]),
+                                      df=x$coefficients[, "df"]))
     cat("\nCoefficients:\n")
     print(r2, digits=digits)
 
