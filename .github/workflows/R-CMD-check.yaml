@@ -41,7 +41,10 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - uses: r-lib/actions/setup-tinytex@master
+      - uses: r-lib/actions/setup-tinytex@v1
+        env:
+          # install full prebuilt version
+          TINYTEX_INSTALLER: TinyTeX
 
       - name: Query dependencies
         run: |
