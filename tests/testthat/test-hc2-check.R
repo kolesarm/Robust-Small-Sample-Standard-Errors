@@ -30,9 +30,6 @@ test_that("New implementation matches old", {
 MatSqrtInverse <- function(A) {
 
     ei <- eigen(A, symmetric=TRUE)
-    if (min(ei$values) <= 0)
-        warning("Gram matrix doesn't appear to be positive definite")
-
     d <- pmax(ei$values, 0)
     d2 <- 1/sqrt(d)
     d2[d == 0] <- 0
@@ -218,7 +215,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
     d0[[1]]$x <- c(rep(1, 4), rep(0, 5), 1)
     fm2 <- lm(y~x+cl, data=d0[[1]])
     p1 <- dfadjustSE(fm2, d0[[1]]$cl)
-    expect_warning(p2 <- BMlmSE(fm2, d0[[1]]$cl))
+    p2 <- BMlmSE(fm2, d0[[1]]$cl)
     expect_lt(max(abs(p2$adj.se - p1$coefficients[, "Adj. se"])), 1e-6)
 
     ## P-values
