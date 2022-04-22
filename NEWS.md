@@ -1,3 +1,9 @@
+# dfadjust 1.0.4
+
+## Minor improvements and fixes
+
+- Adjust tolerance in unit tests so that they don't fail under BLAS/LAPACK 3.10.1
+
 # dfadjust 1.0.3
 
 ## Minor improvements and fixes

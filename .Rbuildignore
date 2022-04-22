@@ -4,7 +4,6 @@
 .lintr
 ^README\.md$
 .gitignore
-^\.travis\.yml$
 ^codecov\.yml$
 ^cran-comments\.md$
 ^CRAN-RELEASE$

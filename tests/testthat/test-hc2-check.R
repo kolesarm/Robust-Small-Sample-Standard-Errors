@@ -146,8 +146,9 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
                data.frame(y=rnorm(100)+cl3,
                      x=cbind(sin(1:100), rnorm(100)),
                      cl=as.factor(cl3)))
-    ep <- 50*.Machine$double.eps
-    ## Increase numerical tolerance if platform doesn't have long double
+    ep <- 100*.Machine$double.eps
+    ## Increase numerical tolerance if platform doesn't have long double.
+    ## BLAS/LAPACK 3.10.1 in R-devel also seemes to be creating issues on M1 Mac
     bigep <- if (capabilities("long.double")) 10*ep else 10^4*ep
     for (j in seq_along(d0)) {
         fm <- lm(y~x.1+x.2, data=d0[[j]])
@@ -157,7 +158,7 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
         rold <- BMlmSE(fm)
         expect_lt(max(abs(r$vcov-rold$vcov)), ep)
         expect_lt(max(abs(r$coefficients[, "df"]-rold$dof)), bigep)
-        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), ep)
+        expect_lt(max(abs(r$coefficients[, "Adj. se"]-rold$adj.se)), bigep)
         expect_lt(max(abs(r$coefficients[, "HC2 se"]-rold$se)), ep)
 
         ## If each observation in its cluster, we get HC2

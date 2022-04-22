@@ -41,7 +41,6 @@ install.packages("dfadjust")
 ```
 
 Alternatively, you can get the current development version from GitHub:
-
 ``` r
 if (!requireNamespace("remotes")) {
   install.packages("remotes")
