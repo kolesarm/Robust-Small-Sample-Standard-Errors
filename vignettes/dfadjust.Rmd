@@ -166,9 +166,7 @@ the block of the hat matrix corresponding to cluster $s$. In presence of
 cluster-specific fixed effects, $I-Q_s Q_s'$ is not generally invertible, which
 necessitates taking a generalized inverse. So long as the vector $\ell$ doesn't
 load on these fixed effects, $\hat{V}$ will be unbiased under homoskedasticity,
-as the next result, which slightly generalizes the Theorem 1 in @PuTi18, shows.[^3]
-
-[^3]: In particular, @PuTi18 require $A_s$ to be the pseudo-inverse. We show that it's sufficient for $A_s$ to be a generalized inverse.
+as the next result, which slightly generalizes the Theorem 1 in @PuTi18, shows.
 
 \begin{lemma}
   Suppose that $X=(W,L)$ is full rank, and suppose that the vector $\ell$ loads only on
@@ -310,8 +308,8 @@ $I-Q_{s}Q_{s}'$, the left-hand side of \eqref{equation:1} can therefore be writt
   \ddot{W}_{s}'A_{s}(I-Q_{s}Q_{s}')A_{s}'\ddot{W}_{s}
   =  B_{s}'CC A_{s} CC A_{s}' CC B_{s}=\ddot{W}_{s}'\ddot{W}_{s},
 \end{equation*}
-where the second equality follows by the definition of a generalized inverse,
-since $A_{s}=C^{-}$.
+where the second equality follows by the definition of a generalized inverse.
+
 
 
 
