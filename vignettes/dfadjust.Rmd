@@ -160,48 +160,67 @@ where
   =u_{s}-Q_{s}Q' u,\qquad
    a_{s}={A}_{s}'Q_{s}\tilde{\ell},
 \end{equation*}
-and the matrix $A_{s}$ is given by the symmetric square root of the inverse of
-$I-Q_{s}Q_{s}'$, or else its pseudo-inverse if it is singular, as is the case,
-for example, if $X$ contains fixed effects. We do not need to insist on
-$I-Q_{s}Q_{s}'$ to be invertible, since, using the identity
-\begin{equation*}
-  \hat{V}=u\sum_{s}(I-QQ')_{s}'a_{s}a_{s}'(I-QQ')_{s} u,
-\end{equation*}
-one can verify by simple algebra that a sufficient condition for $\hat{V}$ to be
-unbiased under homoskedasticity is that
-$Q_{s}'A_{s}(I-Q_{s}Q_{s}')A_{s}Q_{s}=Q_{s}'Q_{s}$ (see, for example,
-@PuTi18, for details).
 
-If the observations are independent, the vector of leverages
-$(Q_{1}'Q_{1}, \dotsc, Q_{n}'Q_{n})$ can be computed directly using the
-`stats::hatvalues` function. In this case, use this function to compute
+and $A_s$ is a generalized inverse of the symmetric square root of $I-Q_s Q_s'$,
+the block of the hat matrix corresponding to cluster $s$. In presence of
+cluster-specific fixed effects, $I-Q_s Q_s'$ is not generally invertible, which
+necessitates taking a generalized inverse. So long as the vector $\ell$ doesn't
+load on these fixed effects, $\hat{V}$ will be unbiased under homoskedasticity,
+as the next result, which slightly generalizes the Theorem 1 in @PuTi18, shows.[^3]
+
+[^3]: In particular, @PuTi18 require $A_s$ to be the pseudo-inverse. We show that it's sufficient for $A_s$ to be a generalized inverse.
+
+\begin{lemma}
+  Suppose that $X=(W,L)$ is full rank, and suppose that the vector $\ell$ loads only on
+  elements of $W$. Let $\ddot{W}$ denote the residual from projecting $W$ onto
+  $L$, and suppose that for each cluster $s$, (i) $L_s'\ddot{W}_s=0$ and that
+  (ii) $\sum_{k=1}^S I(k\neq s)\ddot{W}_k'\ddot{W}_k$ is full rank. Then $\hat{V}$ is
+  unbiased under homoskedasticity.
+\end{lemma}
+
+The proof is given in the last section. By definition of projection, $L$ and
+$\ddot{W}$ are orthogonal. Condition (i) of the lemma strengthens this
+requirement to orthogonality within each cluster. It holds if $L$ corresponds to
+a vector of cluster fixed effects, or more generally if $L$ contains
+cluster-specific variables. Condition (ii) ensures that after partialling out
+$L$, it is feasible to run leave-one-cluster-out regressions. Without
+clustering, the condition is equivalent to the requirement that the partial
+leverages associated with $\ddot{W}$ are smaller than one.[^2]
+
+[^2]: To see this, let $H=\ddot{W}(\ddot{W}'\ddot{W})^{-1}\ddot{W}'$ denote the partial projection matrix. Since $H=H^{2}$, \begin{equation*}H_{ii}-H_{ii}^{2}=\sum_{j\neq i}H_{i j}H_{j i}=\ddot{W}_{i}'(\ddot{W}'\ddot{W})^{-1} [\sum_{j\neq i}\ddot{W}_{j}\ddot{W}_{j}'] (\ddot{W}'\ddot{W})^{-1}\ddot{W}_{i}.\end{equation*} so that $H_{ii}=1$ iff $\sum_{j\neq i}\ddot{W}_{j}\ddot{W}_{j}'$ is reduced rank.
+
+If the observations are independent, the vector of leverages $(Q_{1}'Q_{1},
+\dotsc, Q_{n}'Q_{n})$ can be computed directly using the `stats::hatvalues`
+function. In this case, we use this function to compute
 $A_{i}=1/\sqrt{1-Q_{i}'Q_{i}}$ directly, and we then compute
 $a_{i}=A_{i}Q_{i}'\tilde{\ell}$ using vector operations. For the case with
-clustering, computing the spectral decomposition of $I-Q_{s}Q_{s}'$ can be
-expensive or even infeasible if the cluster size $n_s$ is large. We therefore
-use the following result, suggested to us by Ulrich Müller, which allows us to compute
-$a_{s}$ by computing a spectral decomposition of a $p\times p$ matrix.
+clustering, computing an inverse of $I-Q_{s}Q_{s}'$ can be expensive or even
+infeasible if the cluster size $n_s$ is large. We therefore use the following
+result, a version of which was suggested to us by Ulrich Müller, which allows us
+to compute $a_{s}$ by computing a spectral decomposition of a $p\times p$
+matrix.
 
--  Let $Q_{s}'Q_{s}=\sum_{i=1}^{p}\lambda_{is}r_{is}r_{is}'$ be the spectral
-   decomposition of $Q_{s}'Q_{s}$. Then $A_{s}=\sum_{i\colon \lambda_{i}\neq
-   1}(1-\lambda_{i})^{-1/2}Q_{s}r_{is}r_{is}'Q_{s}'$, satisfies
-   $A_{s}(I-Q_{s}Q_{s}')A_{s}=I$.
+\begin{lemma}
+  Let $Q_{s}'Q_{s}=\sum_{i=1}^{p}\lambda_{is}r_{is}r_{is}'$ be the spectral
+   decomposition of $Q_{s}'Q_{s}$. Then $a_s=Q_{s}D_{s}
+  \tilde{\ell}$, where $\qquad D_{s}=\sum_{i\colon \lambda_{i}\neq
+    1}(1-\lambda_{i})^{-1/2}r_{is}r_{is}'$.
+\end{lemma}
 
-   This follows from the fact that $I-Q_{s}Q_{s}'$ has eigenvalues
-   $1-\lambda_{is}$ and eigenvectors $Q_{s}r_{is}$, and hence its pseudoinverse
-   is $\sum_{i\colon \lambda_{i}\neq
-   1}(1-\lambda_{i})^{-1}Q_{s}r_{is}r_{is}'Q_{s}'$.
-
-Using the lemma, we can compute $a_{s}$ efficiently as:
+The lemma follows from the fact that $I-Q_{s}Q_{s}'$ has eigenvalues
+$1-\lambda_{is}$ and eigenvectors $Q_{s}r_{is}$. More precisely, let
+$Q_{s}=\sum_{i}\lambda_{is}^{1/2}u_{is}r_{is}'$ denote the singular value
+decomposition of $Q_{s}$, so that
+$I-Q_{s}Q_{s}'=\sum_{i}(1-\lambda_{is})u_{is}u_{is}'$, and we can take
+$A_{s}=\sum_{i\colon \lambda_{is}\neq 1}(1-\lambda_{is})^{-1/2}u_{is}u_{is}'$.
+Then,
 \begin{equation*}
-  a_{s}
-  =
-  \sum_{i\colon \lambda_{i}\neq
-    1}(1-\lambda_{i})^{-1/2}Q_{s}r_{is}r_{is}'Q_{s}'Q_{s}\tilde{\ell}
-  =Q_{s}D_{s}
-  \tilde{\ell},\qquad D_{s}=\sum_{i\colon \lambda_{i}\neq
-    1}\lambda_{i}(1-\lambda_{i})^{-1/2}r_{is}r_{is}'.
+  A_{s}'Q_{s}=\sum_{i\colon \lambda_{i}\neq 1}
+  (1-\lambda_{is})^{-1/2}\lambda_{is}^{1/2} u_{is} r_{is}'
+  =Q_{s}\sum_{i\colon \lambda_{i}\neq 1}(1-\lambda_{is})^{-1/2}r_{is} r_{is}',
 \end{equation*}
+where the second equality uses $Q_{s}r_{is}=\lambda_{is}^{1/2}u_{is}$.
+
 
 ## Degrees of freedom correction
 
@@ -254,6 +273,46 @@ estimates.
 ```{r cleanup, include=FALSE}
 options(oldoptions)
 ```
+# Proof of Lemma 1
+
+The estimator of the block of $V$ associated with $W$ implied by $\hat{V}$ is
+given by
+\begin{equation*}
+  (\ddot{W}'\ddot{W})^{-1}  \sum_{s}\ddot{W}_{s}'A_{s} (I-QQ')_{s} u u'(I-QQ')_{s}'A_{s}'\ddot{W}_{s}
+  (\ddot{W}'\ddot{W})^{-1},
+\end{equation*}
+which is unbiased under homoskedasticity if for each $s$,
+\begin{equation}\label{equation:1}
+  \ddot{W}_{s}'A_{s}(I-Q_{s}Q_{s}')A_{s}'\ddot{W}_{s}
+  = \ddot{W}_{s}'\ddot{W}_{s}.
+\end{equation}
+We will show that \eqref{equation:1} holds. To this end, we first claim that under
+conditions (i) and (ii), $\ddot{W}_{s}$ is in the column space of
+$I-Q_{s}Q_{s}'$ (a claim that's trivial if this matrix is full rank). Decompose
+$I-QQ'=I-H_{\ddot{W}}-H_{L}$, where $H_{\ddot{W}}$ and $H_{L}$ are hat matrices
+associated with $\ddot{W}$ and $L$. The block associated with cluster $s$ can
+thus be written as
+$I-Q_{s}Q_{s}'=I-L_{s}(L' L)^{-1}L_{s}'-\ddot{W}_{s}(\ddot{W}'\ddot{W})^{-1}\ddot{W}_{s}'$.
+Let
+$B_{s}=\ddot{W}_{s}(\ddot{W}'\ddot{W}-\ddot{W}_{s}'\ddot{W}_{s})^{-1}\ddot{W}'\ddot{W}$,
+which is well-defined under condition (ii). Then, using condition (i), we get
+\begin{equation*}
+\begin{split}
+  (I-Q_{s}Q_{s}')B_{s}
+  &=(I-\ddot{W}_{s}(\ddot{W}'\ddot{W})^{-1}\ddot{W}_{s}')B_{s}\\
+  &=\ddot{W}_{s}(I-(\ddot{W}'\ddot{W})^{-1}\ddot{W}_{s}'\ddot{W}_{s})
+  (\ddot{W}'\ddot{W}-\ddot{W}_{s}'\ddot{W}_{s})^{-1}\ddot{W}'\ddot{W}=\ddot{W}_{s},
+\end{split}
+\end{equation*}
+proving the claim. Letting $C$ denote the symmetric square root of
+$I-Q_{s}Q_{s}'$, the left-hand side of \eqref{equation:1} can therefore be written as
+\begin{equation*}
+  \ddot{W}_{s}'A_{s}(I-Q_{s}Q_{s}')A_{s}'\ddot{W}_{s}
+  =  B_{s}'CC A_{s} CC A_{s}' CC B_{s}=\ddot{W}_{s}'\ddot{W}_{s},
+\end{equation*}
+where the second equality follows by the definition of a generalized inverse,
+since $A_{s}=C^{-}$.
+
 
 
 # References

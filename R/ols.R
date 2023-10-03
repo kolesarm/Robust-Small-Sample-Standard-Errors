@@ -74,22 +74,22 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
     sandwich <- function(meat) backsolve(R, t(backsolve(R, meat)))
 
     ## no clustering
-    if(is.null(clustervar)) {
+    if (is.null(clustervar)) {
         ## Compute meat of HC1 and HC2
         diaghat <- try(stats::hatvalues(model), silent = TRUE)
         AQ <- (1-diaghat >= tol) * (1/sqrt(pmax(1-diaghat, tol))) * Q
         HC2 <- crossprod(u * AQ)
-        HC1 <- n/(n-K)*crossprod(u*Q)
+        HC1 <- n / (n-K) * crossprod(u*Q)
 
         ## G'*G
         df0 <- function(ell) {
             a <-  drop(AQ %*% backsolve(R, ell, transpose=TRUE))
             B <- a*Q
-             (sum(a^2)-sum(B^2))^2 /
-                 (sum(a^4)-2*sum((a*B)^2)+sum(crossprod(B)^2))
+            (sum(a^2)-sum(B^2))^2 /
+                (sum(a^4)-2*sum((a*B)^2)+sum(crossprod(B)^2))
         }
     } else {
-        if(!is.factor(clustervar)) stop("'clustervar' must be a factor")
+        if (!is.factor(clustervar)) stop("'clustervar' must be a factor")
         ## Order u, Q by clusters
         ord <- order(clustervar)
         u <- u[ord]
@@ -99,14 +99,14 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
         ## Compute meat of HC1 and HC2
         S <- nlevels(clustervar) # number of clusters
         uj <- apply(u*Q, 2, function(x) tapply(x, clustervar, sum))
-        HC1 <- S/(S-1) * (n-1)/(n-K) * crossprod(uj)
+        HC1 <- S / (S-1) * (n-1) / (n-K) * crossprod(uj)
         ## A_s * Q_s
         AQf <- function(s) {
             Qs <- Q[clustervar==s, , drop=FALSE] # nolint
             e <- eigen(crossprod(Qs))
-            Ds <- e$vectors %*% ((1-e$values >= tol) *
-                                 (1/sqrt(pmax(1-e$values, tol))) * t(e$vectors))
-            Qs %*% Ds
+            Ds <-  (1-e$values >= tol) *
+                (1/sqrt(pmax(1-e$values, tol))) * t(e$vectors)
+            Qs %*% e$vectors %*% Ds
         }
         AQ <- lapply(levels(clustervar), AQf) # list of matrices
         AQ <- do.call(rbind, AQ)
@@ -136,7 +136,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
             } else {
                 D <- as.vector(tapply(a, clustervar, sum))
                 Fm  <- apply(Q, 2, function(x) tapply(x, clustervar, sum))
-                GG <- sig*(diag(as)-tcrossprod(B)) +
+                GG <- sig * (diag(as)-tcrossprod(B)) +
                     rho*tcrossprod(diag(D)-tcrossprod(B, Fm))
                 sum(diag(GG))^2 / sum(GG^2)
             }
@@ -173,12 +173,10 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 
 #' @export
 print.dfadjustSE <- function(x, digits = getOption("digits"), ...) {
-    r2 <- cbind(x$coefficients,
-                "p-value"=2*stats::pt(-abs(x$coefficients[, "Estimate"] /
-                                           x$coefficients[, "HC2 se"]),
-                                      df=x$coefficients[, "df"]))
+    xx <- x$coefficients
+    pv <- 2*stats::pt(-abs(xx[, "Estimate"] / xx[, "HC2 se"]), df=xx[, "df"])
     cat("\nCoefficients:\n")
-    print(r2, digits=digits)
+    print(cbind(xx, "p-value"=pv), digits=digits)
 
     invisible(x)
 }
