@@ -1,3 +1,10 @@
+# dfadjust 1.0.5
+
+## Minor improvements and fixes
+
+- Fix inaccuracies about theoretical properties of the variance estimator in
+  package vignette
+
 # dfadjust 1.0.4
 
 ## Minor improvements and fixes

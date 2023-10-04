@@ -40,7 +40,7 @@ zero.}
 Returns a list with the following components \describe{
 
 \item{vcov}{Variance-covariance matrix estimator. For independent errors, it
-corresponds to the HC2 estimator (see MacKinnon and White, 1985 and the
+corresponds to the HC2 estimator (see MacKinnon and White, 1985, or the
 reference manual for the \code{sandwich} package). For clustered errors, it
 corresponds to a version the generalization of the HC2 estimator, called LZ2
 in Imbens and Kolesár.}
@@ -82,6 +82,11 @@ errors for linear regression with multi-stage samples. Survey Methodology,
 \cite{Guido W. Imbens and Michal Kolesár. Robust standard errors in small
 samples: Some practical advice. Review of Economics and Statistics,
 98(4):701–712, October 2016. \doi{10.1162/REST_a_00552}}
+
+\cite{James G. MacKinnon and Halbert White. Some
+Heteroskedasticity-Consistent Covariance Matrix Estimators with Improved
+Finite Sample Properties. Journal of Econometrics, (29)3:305–325, September
+1985. \doi{10.1016/0304-4076(85)90158-7}}
 
 \cite{Brent R. Moulton. Random group effects and the precision of regression
 estimates. Journal of Econometrics, 32(3):385–397, August 1986.

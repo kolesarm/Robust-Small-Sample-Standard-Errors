@@ -97,7 +97,8 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
             ## Moulton estimates
             ns <- tapply(u, clustervar, length)
             ssr <- sum(u^2)
-            s1 <- sapply(seq_along(tu), function(i) sum(tu[[i]] %o% tu[[i]]))
+            s1 <- vapply(seq_along(tu), function(i) sum(tu[[i]] %o% tu[[i]]),
+                         numeric(1))
             rho <- max((sum(s1)-ssr) / (sum(ns^2)-n), 0)
             c(sig.eps=max(ssr/n - rho, 0), rho=rho)
         }

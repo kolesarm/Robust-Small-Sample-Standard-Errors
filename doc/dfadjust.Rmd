@@ -29,14 +29,14 @@ knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",
 oldoptions <- options(digits=3)
 ```
 
-# Description
+# Description[^1]
 
 This package implements small-sample degrees of freedom adjustments to robust
 and cluster-robust standard errors in linear regression, as discussed in
 @ImKo16. The implementation can handle models with fixed effects, and cases
-with a large number of observations or clusters [^1].
+with a large number of observations or clusters
 
-[^1]: We thank Ulrich Müller for suggesting to us the lemma below.
+[^1]: We thank Bruce Hansen for comments and Ulrich Müller for suggesting to us a version of Lemma 2 below.
 
 ```{r setup}
 library(dfadjust)
@@ -194,9 +194,8 @@ $A_{i}=1/\sqrt{1-Q_{i}'Q_{i}}$ directly, and we then compute
 $a_{i}=A_{i}Q_{i}'\tilde{\ell}$ using vector operations. For the case with
 clustering, computing an inverse of $I-Q_{s}Q_{s}'$ can be expensive or even
 infeasible if the cluster size $n_s$ is large. We therefore use the following
-result, a version of which was suggested to us by Ulrich Müller, which allows us
-to compute $a_{s}$ by computing a spectral decomposition of a $p\times p$
-matrix.
+result, which allows us to compute $a_{s}$ by computing a spectral decomposition
+of a $p\times p$ matrix.
 
 \begin{lemma}
   Let $Q_{s}'Q_{s}=\sum_{i=1}^{p}\lambda_{is}r_{is}r_{is}'$ be the spectral

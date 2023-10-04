@@ -1,4 +1,4 @@
-## ---- include=FALSE, cache=FALSE----------------------------------------------
+## ----include=FALSE, cache=FALSE-----------------------------------------------
 library("knitr")
 knitr::opts_knit$set(self.contained = FALSE)
 knitr::opts_chunk$set(tidy = TRUE, collapse=TRUE, comment = "#>",

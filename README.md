@@ -6,7 +6,8 @@ This package implements the small-sample degrees of freedom adjustments for
 robust and cluster-robust standard errors in linear regression described in
 [Imbens and Kolesár (2016)](https://doi.org/10.1162/REST_a_00552).
 
-SAS version by Nicolas Moreau is available [here](http://cemoi.univ-reunion.fr/econometrie-avec-r-et-sas).
+SAS version by Nicolas Moreau is available
+[here](http://cemoi.univ-reunion.fr/econometrie-avec-r-et-sas).
 
 See vignette [dfadjust](doc/dfadjust.pdf) for description of the package
 (available through `vignette("dfadjust")` once package is installed), and the
