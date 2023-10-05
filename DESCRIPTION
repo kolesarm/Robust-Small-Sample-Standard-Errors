@@ -1,6 +1,6 @@
 Package: dfadjust
 Title: Degrees of Freedom Adjustment for Robust Standard Errors
-Version: 1.0.5
+Version: 1.0.5.9000
 Authors@R:
     person(given = "Michal",
            family = "Kolesár",
