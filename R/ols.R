@@ -80,7 +80,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 
     ## no clustering
     if (is.null(clustervar)) {
-        ## Compute meat of HC1 and HC2
+        ## Compute meat of HC1 and HC2. Hatvalues scale invariant
         diaghat <- try(stats::hatvalues(model), silent = TRUE)
         AQ <- (1-diaghat >= tol) * (1/sqrt(pmax(1-diaghat, tol))) * Q
         HC2 <- crossprod(u * AQ)
@@ -105,7 +105,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
         S <- nlevels(clustervar) # number of clusters
         uj <- apply(u*Q, 2, function(x) tapply(x, clustervar, sum))
         HC1 <- S / (S-1) * (n-1) / (n-K) * crossprod(uj)
-        ## A_s * Q_s
+        ## A_s * Q_s; Q matrix scale invariant
         AQf <- function(s) {
             Qs <- Q[clustervar==s, , drop=FALSE] # nolint
             e <- eigen(crossprod(Qs))
@@ -113,6 +113,7 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
                 (1/sqrt(pmax(1-e$values, tol))) * t(e$vectors)
             Qs %*% e$vectors %*% Ds
         }
+
         AQ <- lapply(levels(clustervar), AQf) # list of matrices
         AQ <- do.call(rbind, AQ)
         uj <- apply(u*AQ, 2, function(x) tapply(x, clustervar, sum))
