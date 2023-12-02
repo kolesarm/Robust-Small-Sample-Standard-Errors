@@ -223,14 +223,14 @@ test_that("New implementation matches old", {
 
     ## Test scaling
     p3 <- dfadjustSE(lm.fit(x=model.matrix(fm2),
-                            y=(1e-8)*fm2$model$y), d0[[1]]$cl)
+                            y=1e-8*fm2$model$y), d0[[1]]$cl)
     p4 <- dfadjustSE(lm.fit(x=model.matrix(fm2),
-                            y=(1e8)*fm2$model$y), d0[[1]]$cl)
+                            y=1e8*fm2$model$y), d0[[1]]$cl)
     expect_lt(max(abs(p3$vcov*1e16-p1$vcov)), 1e-12)
     expect_lt(max(abs(p4$vcov*1e-16-p1$vcov)), 1e-12)
-    p5 <- dfadjustSE(lm.fit(x=model.matrix(fm2)*(1e8),
+    p5 <- dfadjustSE(lm.fit(x=model.matrix(fm2)*1e8,
                             y=fm2$model$y), d0[[1]]$cl)
-    p6 <- dfadjustSE(lm.fit(x=model.matrix(fm2)*(1e-8),
+    p6 <- dfadjustSE(lm.fit(x=model.matrix(fm2)*1e-8,
                             y=fm2$model$y), d0[[1]]$cl)
     expect_lt(max(abs(p5$vcov*1e16-p1$vcov)), 1e-12)
     expect_lt(max(abs(p6$vcov*1e-16-p1$vcov)), 1e-12)
