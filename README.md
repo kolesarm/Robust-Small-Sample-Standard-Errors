@@ -1,4 +1,4 @@
-[![R-CMD-check](https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors/workflows/R-CMD-check/badge.svg)](https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors/actions) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://app.codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master) [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dfadjust)](https://cran.r-project.org/package=dfadjust)
+[![R-CMD-check](https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors/workflows/R-CMD-check/badge.svg)](https://github.com/kolesarm/Robust-Small-Sample-Standard-Errors/actions) [![Coverage status](https://codecov.io/gh/kolesarm/Robust-Small-Sample-Standard-Errors/branch/master/graph/badge.svg)](https://app.codecov.io/github/kolesarm/Robust-Small-Sample-Standard-Errors?branch=master) [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dfadjust)](https://cran.r-project.org/package=dfadjust) [![Download statistics](https://cranlogs.r-pkg.org/badges/dfadjust)](https://cran.r-project.org/package=dfadjust)
 
 # dfadjust
 
