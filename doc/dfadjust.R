@@ -29,8 +29,8 @@ dfadjustSE(r1, clustervar=d1$cl, IK=FALSE)
 
 ## -----------------------------------------------------------------------------
 r1 <- lm(y~x3+cl, data=d1)
-dfadjustSE(r1, clustervar=d1$cl, ell=c(0, 1, rep(0, r1$rank-2)))
-dfadjustSE(r1, clustervar=d1$cl, ell=c(0, 1, rep(0, r1$rank-2)), IK=FALSE)
+dfadjustSE(r1, clustervar=d1$cl, ell=2)
+dfadjustSE(r1, clustervar=d1$cl, ell=2, IK=FALSE)
 
 ## -----------------------------------------------------------------------------
 d2 <- do.call("rbind", replicate(500, d1, simplify = FALSE))

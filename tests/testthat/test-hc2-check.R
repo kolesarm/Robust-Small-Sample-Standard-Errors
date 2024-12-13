@@ -141,7 +141,7 @@ test_that("New implementation matches old", {
                data.frame(y=1:100,
                           x=cbind(sin(1:100), (1:100)^3),
                           cl=as.factor(c(rep(1, 60), rep(2, 20), rep(3, 20)))),
-               data.frame(y=(1:100)^2+cl3,
+               data.frame(y = (1:100)^2+cl3,
                           x=cbind(sin(1:100), 1:100),
                           cl=as.factor(cl3)))
     ep <- 100*.Machine$double.eps

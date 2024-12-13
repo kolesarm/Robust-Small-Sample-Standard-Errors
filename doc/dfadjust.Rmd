@@ -82,8 +82,8 @@ element:
 
 ```{r}
 r1 <- lm(y~x3+cl, data=d1)
-dfadjustSE(r1, clustervar=d1$cl, ell=c(0, 1, rep(0, r1$rank-2)))
-dfadjustSE(r1, clustervar=d1$cl, ell=c(0, 1, rep(0, r1$rank-2)), IK=FALSE)
+dfadjustSE(r1, clustervar=d1$cl, ell=2)
+dfadjustSE(r1, clustervar=d1$cl, ell=2, IK=FALSE)
 ```
 
 Finally, an example in which the clusters are large. We have 500,000 observations:

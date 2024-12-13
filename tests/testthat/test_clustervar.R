@@ -46,3 +46,20 @@ test_that("Test clustering if clusters out of order", {
     expect_equal(unname(r5$coefficients[, 5]), c(17.6142349, 12.10389102))
 
 })
+
+test_that("ell specifications", {
+    x <- sin(1:100)
+    y <- 1:100
+    fm <- lm(y ~ x + I(x^2))
+    clustervar <- as.factor(c(rep(1, 40), rep(5, 20),
+                              rep(2, 20), rep(3, 10), rep(4, 10)))
+    r0 <- dfadjustSE(fm, clustervar, ell=2)
+    r1 <- dfadjustSE(fm, clustervar, ell=c(0, 1, 0))
+    expect_error(dfadjustSE(fm, clustervar, ell=c(0, 1, 0, 1, 1)))
+    expect_equal(drop(unname(r1$coefficients-r0$coefficients)), rep(0, 5))
+    r2 <- dfadjustSE(fm, clustervar, ell=c(1, 3))
+    r3 <- dfadjustSE(fm, clustervar)
+    expect_equal(r3$coefficients[c(1, 3), ], r2$coefficients)
+    fm <- lm(y ~ x +I(x))
+    expect_error(r4 <- dfadjustSE(fm, clustervar))
+})

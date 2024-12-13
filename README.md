@@ -32,6 +32,19 @@ dfadjustSE(fm, clustervar)
 Here we defined the first six observations to be in cluster 1, the next two in
 cluster 2, and the last three in cluster three.
 
+The package handles cluster fixed effects, and large clusters. Computing the
+adjustment with one million observations and 50 clusters, takes about 5 seconds:
+
+``` r
+N <- 10^6
+x <- sin(1:N)
+y <- seq(N)
+clustervar <- as.factor(rep(1:50, each=N/50))
+fm <- lm(y~x+clustervar)
+## Inference on x, i.e. second coefficient
+dfadjustSE(fm, ell=2, clustervar=clustervar)
+```
+
 ## Installation
 
 You can install the released version of `dfadjust` from

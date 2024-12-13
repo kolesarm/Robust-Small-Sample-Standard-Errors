@@ -20,10 +20,13 @@ dfadjustSE(
 not supplied), the command computes heteroscedasticity-robust standard
 errors, rather than cluster-robust standard errors.}
 
-\item{ell}{A vector of the same length as the dimension of covariates,
-specifying which linear combination \eqn{\ell'\beta}{ell'beta} of
-coefficients \eqn{\beta}{beta} to compute. If \code{NULL}, compute
-standard errors for each regressor coefficient.}
+\item{ell}{A vector specifying for which coefficients to compute the standard
+errors. If \code{NULL}, compute standard errors for each regressor
+coefficient. If \code{ell} consists of integers and its length is smaller
+than the number of regressors, compute standard errors for those
+coefficients. If the vector has the same length as the dimension of
+regressors, compute standard error for the linear combination
+\eqn{\ell'\beta}{ell'beta} of coefficients \eqn{\beta}{beta}.}
 
 \item{IK}{Only relevant for cluster-robust standard errors. Specifies whether
 to compute the degrees-of-freedom adjustment using the Imbens-Kolesár
@@ -62,15 +65,18 @@ Standard Errors with adjusted degrees of freedom
 }
 \examples{
 ## No clustering:
-set.seed(42)
 x <- sin(1:100)
-y <- rnorm(100)
+y <- 1:100
 fm <- lm(y ~ x + I(x^2))
 dfadjustSE(fm)
 ## Clustering, with 5 clusters
-clustervar <- as.factor(c(rep(1, 40), rep(1, 20),
+clustervar <- as.factor(c(rep(1, 40), rep(5, 20),
                         rep(2, 20), rep(3, 10), rep(4, 10)))
 dfadjustSE(fm, clustervar)
+## Only compute standard errors for the second coefficient
+dfadjustSE(fm, clustervar, ell=2)
+## Compute standard error for the sum of second and third coefficient
+dfadjustSE(fm, clustervar, ell=c(0, 1, 1))
 }
 \references{
 {
