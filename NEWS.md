@@ -1,3 +1,14 @@
+# dfadjust 1.1.0
+
+## New Features
+
+- Argument `ell` now overloaded:
+
+## Minor improvements and fixes
+
+- Use `collapse::fsum` instead of `tapply` calls to improve speed
+
+
 # dfadjust 1.0.5
 
 ## Minor improvements and fixes

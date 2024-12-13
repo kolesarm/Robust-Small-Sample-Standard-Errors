@@ -103,12 +103,15 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 
         ## Compute meat of HC1 and HC2
         S <- nlevels(clustervar) # number of clusters
-        uj <- apply(u*Q, 2, function(x) tapply(x, clustervar, sum))
+
+        grp <- collapse::GRP(clustervar)
+        ## OLD uj <- apply(u*Q, 2, function(x) tapply(x, clustervar, sum))
+        uj <- collapse::fsum(u*Q, grp)
         HC1 <- S / (S-1) * (n-1) / (n-K) * crossprod(uj)
         ## A_s * Q_s; Q matrix scale invariant
         AQf <- function(s) {
             Qs <- Q[clustervar==s, , drop=FALSE] # nolint
-            e <- eigen(crossprod(Qs))
+            e <- eigen(crossprod(Qs), symmetric=TRUE)
             Ds <-  (1-e$values >= tol) *
                 (1/sqrt(pmax(1-e$values, tol))) * t(e$vectors)
             Qs %*% e$vectors %*% Ds
@@ -116,7 +119,8 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 
         AQ <- lapply(levels(clustervar), AQf) # list of matrices
         AQ <- do.call(rbind, AQ)
-        uj <- apply(u*AQ, 2, function(x) tapply(x, clustervar, sum))
+        # OLD uj <- apply(u*AQ, 2, function(x) tapply(x, clustervar, sum))
+        uj <- collapse::fsum(u*AQ, grp)
         HC2 <- crossprod(uj)
 
         if (IK) {
@@ -125,7 +129,8 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
             den <- sum(tapply(u, clustervar, length)^2)-n
             rho <- 0
             if (den>0)
-                rho <- (sum(tapply(u, clustervar, sum)^2)-ssr) / den
+                ## OLD rho <- (sum(tapply(u, clustervar, sum)^2)-ssr) / den
+                rho <- (sum(collapse::fsum(u, grp)^2)-ssr) / den
 
             ## Don't allow for negative correlation
             if (rho0) rho <- max(rho, 0)
@@ -134,14 +139,18 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 
         df0 <- function(ell) {
             a <-  drop(AQ %*% backsolve(R, ell, transpose=TRUE))
-            as <- as.vector(tapply(a^2, clustervar, sum))
-            B  <- apply(a*Q, 2, function(x) tapply(x, clustervar, sum))
+            ## OLD as <- as.vector(tapply(a^2, clustervar, sum))
+            as <- collapse::fsum(a^2, grp)
+            ## OLD B  <- apply(a*Q, 2, function(x) tapply(x, clustervar, sum))
+            B <- collapse::fsum(a*Q, grp)
             if (!IK) {
                 (sum(as)-sum(B^2))^2 /
                     (sum(as^2)-2*sum(as*B^2)+sum(crossprod(B)^2))
             } else {
-                D <- as.vector(tapply(a, clustervar, sum))
-                Fm  <- apply(Q, 2, function(x) tapply(x, clustervar, sum))
+                ## OLD D <- as.vector(tapply(a, clustervar, sum))
+                D <- collapse::fsum(a, grp)
+                ## OLD Fm <- apply(Q, 2, function(x) tapply(x, clustervar, sum))
+                Fm <- collapse::fsum(Q, grp)
                 GG <- sig * (diag(as)-tcrossprod(B)) +
                     rho*tcrossprod(diag(D)-tcrossprod(B, Fm))
                 sum(diag(GG))^2 / sum(GG^2)

@@ -17,6 +17,9 @@ test_that("Test clustering if clusters out of order", {
     ## Check against stata
     expect_equal(as.vector(r1$coefficients[, 1:2]),
                  c(-0.4456202905, 0.3241183110, 0.4827602183, 0.1814501834))
+    expect_lt(max(abs(r1$coefficients[, 4]-c(1.053441197, 0.533126248))), 1e-9)
+    expect_lt(max(abs(r1$coefficients[, 5]-c(2.001430933, 1.783242385))), 1e-9)
+
     ## Check same result as when ordered
     dt2 <- dt[order(dt$clusters), ]
     r2 <- dfadjustSE(lm(y~x, data=dt2), cluster=dt2$clusters)
@@ -40,4 +43,6 @@ test_that("Test clustering if clusters out of order", {
                  c(0.4227339762, 0.4421048122))
     expect_equal(unname(r5$coefficients[, "HC1 se"]),
                  c(0.4278077455, 0.4392155956))
+    expect_equal(unname(r5$coefficients[, 5]), c(17.6142349, 12.10389102))
+
 })

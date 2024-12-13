@@ -4,8 +4,7 @@ elt <- function(a, ep) testthat::expect_lt(max(abs(a)), ep)
 
 
 test_that("HC1 and HC2 formulas match sandwich", {
-    set.seed(42)
-    y <- rnorm(10)
+    y <- 1:10
     x <- cbind(sin(1:10), sin(2:11))
     fm <- lm(y~x)
 
@@ -15,11 +14,12 @@ test_that("HC1 and HC2 formulas match sandwich", {
 
     elt(r$vcov-HC2, 100*.Machine$double.eps)
     elt(r$coefficients[, "HC1 se"]-sqrt(diag(HC1)), 100*.Machine$double.eps)
+    elt(r$coefficients[, "df"]-c(4.94624731, 3.90754737, 4.77265484),
+        1e-8)
 })
 
 test_that("clustervar must be a factor", {
-    set.seed(42)
-    y <- rnorm(10)
+    y <- 1:10
     x <- cbind(sin(1:10), sin(2:11))
     fm <- lm(y~x)
     expect_error(dfadjustSE(fm, clustervar=1:10))
@@ -134,16 +134,15 @@ BMlmSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE) {
 }
 
 test_that("New implementation matches old", {
-    set.seed(42)
     cl3 <- c(rep(1, 60), rep(2, 20), rep(3, 20))
-    d0 <- list(data.frame(y=rnorm(10),
+    d0 <- list(data.frame(y=tan(1:10),
                           x=cbind(sin(1:10), cos(2:11)),
                           cl=as.factor(c(rep(1, 6), rep(2, 2), rep(3, 2)))),
-               data.frame(y=rnorm(100),
-                          x=cbind(sin(1:100), rnorm(100)),
+               data.frame(y=1:100,
+                          x=cbind(sin(1:100), (1:100)^3),
                           cl=as.factor(c(rep(1, 60), rep(2, 20), rep(3, 20)))),
-               data.frame(y=rnorm(100)+cl3,
-                          x=cbind(sin(1:100), rnorm(100)),
+               data.frame(y=(1:100)^2+cl3,
+                          x=cbind(sin(1:100), 1:100),
                           cl=as.factor(cl3)))
     ep <- 100*.Machine$double.eps
     ## Increase numerical tolerance if platform doesn't have long double.
@@ -155,83 +154,90 @@ test_that("New implementation matches old", {
 
         ## No clustering
         r <- dfadjustSE(fm)
-        rold <- BMlmSE(fm)
-        elt(r$vcov-rold$vcov, ep)
-        elt(r$coefficients[, "df"]-rold$dof, bigep)
-        elt(r$coefficients[, "Adj. se"]-rold$adj.se, bigep)
-        elt(r$coefficients[, "HC2 se"]-rold$se, ep)
-
+        ro <- BMlmSE(fm)
+        elt((r$vcov-ro$vcov)/r$vcov, ep)
+        elt(r$coefficients[, "df"]-ro$dof, bigep)
+        elt(r$coefficients[, "Adj. se"]-ro$adj.se, bigep)
+        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, ep)
+        elt(r$coefficients[, 5]-ro$dof, bigep)
         ## If each observation in its cluster, we get HC2
         cl <- as.factor(seq_along(fm$model$y))
         elt(dfadjustSE(fm, cl, IK=FALSE)$coefficients-r$coefficients, 10*ep)
 
         ## Clustering
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=FALSE)
-        rold <- BMlmSE(fm, d0[[j]]$cl, IK=FALSE)
-        elt(r$vcov-rold$vcov, ep)
-        elt(r$coefficients[, "HC2 se"]-rold$se, ep)
-        elt(r$coefficients[, "df"]-rold$dof, ep)
-        elt(r$coefficients[, "Adj. se"]-rold$adj.se, bigep)
-        elt(r$coefficients[, "HC1 se"]-rold$seStata, ep)
+        ro <- BMlmSE(fm, d0[[j]]$cl, IK=FALSE)
+        elt((r$vcov-ro$vcov)/r$vcov, bigep)
+
+        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, 10*ep)
+        elt(r$coefficients[, "df"]-ro$dof, bigep)
+        elt((r$coefficients[, "Adj. se"]-ro$adj.se) /
+                r$coefficients[, "Adj. se"], 10*bigep)
+        elt((r$coefficients[, "HC1 se"]-ro$seStata)/ro$seStata, ep)
 
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, rho0=TRUE)
-        rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE)
-        elt(r$vcov-rold$vcov, ep)
-        elt(r$coefficients[, "HC2 se"]-rold$se, ep)
-        elt(r$coefficients[, "df"]-rold$dof, ep)
-        elt(r$coefficients[, "Adj. se"]-rold$adj.se, ep)
-        elt(r$coefficients[, "HC1 se"]-rold$seStata, ep)
+        ro <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE)
+        elt((r$vcov-ro$vcov)/r$vcov, bigep)
+        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, 10*ep)
+        elt(r$coefficients[, "df"]-ro$dof, ep)
+        elt((r$coefficients[, "Adj. se"]-ro$adj.se)/ro$adj.se, bigep)
+        elt((r$coefficients[, "HC1 se"]-ro$seStata)/ro$seStata, ep)
 
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0), rho0=TRUE)
-        rold <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0))
-        elt(r$vcov-rold$vcov, ep)
-        elt(r$coefficients[, "HC2 se"]-rold$se, ep)
-        elt(r$coefficients[, "df"]-rold$dof, ep)
-        elt(r$coefficients[, "Adj. se"]-rold$adj.se, ep)
-        elt(r$coefficients[, "HC1 se"]-rold$seStata, ep)
+        ro <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE, ell=c(1, 1, 0))
+        elt((r$vcov-ro$vcov)/r$vcov, bigep)
+        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, bigep)
+        elt(r$coefficients[, "df"]-ro$dof, ep)
+        elt((r$coefficients[, "Adj. se"]-ro$adj.se)/ro$adj.se, bigep)
+        elt((r$coefficients[, "HC1 se"]-ro$seStata)/ro$seStata, ep)
     }
 
     r <- dfadjustSE(lm(d0[[3]]$y~1))
-    rold <- BMlmSE(lm(d0[[3]]$y~1))
-    elt(r$vcov-rold$vcov, bigep)
-    elt(r$coefficients[, "df"]-rold$dof, bigep)
-    elt(r$coefficients[, "Adj. se"]-rold$adj.se, ep)
-    elt(r$coefficients[, "HC2 se"]-rold$se, ep)
+    ro <- BMlmSE(lm(d0[[3]]$y~1))
+    elt((r$vcov-ro$vcov)/ro$vcov, bigep)
+    elt(r$coefficients[, "df"]-ro$dof, bigep)
+    elt((r$coefficients[, "Adj. se"]-ro$adj.se)/ro$adj.se, ep)
+    elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, ep)
     ## previously incorrectly 9.05e-37 for p-value
     expect_equal(capture.output(print(r, digits=3))[4],
-                 "(Intercept)     1.64  0.128  0.128    0.13 99 9.18e-23")
+                 "(Intercept)     3385    303    303     306 99 2.83e-19")
 
     ## Noninvertible cases
-    d0[[3]]$x.3 <- FALSE
-    d0[[3]]$x.3[1] <- TRUE
-    fm1 <- lm(y~x.1+x.2+x.3, data=d0[[3]])
-    r <- dfadjustSE(fm1)
-    r0 <- dfadjustSE(lm(y~x.1+x.2, data=d0[[3]]))
-    elt(r0$coefficients[, 1:4]-r$coefficients[1:3, 1:4], 0.05)
+    d1 <- d0[[3]]
+    d1$x.3 <- FALSE
+    d1$x.3[1] <- TRUE
+    fm1 <- lm(y~x.1+x.2+x.3, data=d1)
+    rq <- dfadjustSE(fm1)
+    r0 <- dfadjustSE(lm(y~x.1+x.2, data=d1))
+    elt(rq$coefficients[,  4]-c(188.97371028, 107.8865573,
+                                3.36194461, 211.67556014), 1e-8)
+    elt(r0$coefficients[, 4]-c(188.164883779, 109.636001038,
+                               3.371563406), 1e-9)
     expect_warning(rr <- BMlmSE(fm1)$se)
     expect_true(all(is.nan(rr)))
     ## Fixed effects: here minimum eigenvalue is only numerically positive
-    d0[[1]]$x <- c(rep(1, 4), rep(0, 5), 1)
-    fm2 <- lm(y~x+cl, data=d0[[1]])
-    p1 <- dfadjustSE(fm2, d0[[1]]$cl)
-    p2 <- BMlmSE(fm2, d0[[1]]$cl)
+    d2 <- d0[[1]]
+    d2$x <- c(rep(1, 4), rep(0, 5), 1)
+    fm2 <- lm(y~x+cl, data=d2)
+    p1 <- dfadjustSE(fm2, d2$cl)
+    p2 <- BMlmSE(fm2, d2$cl)
     elt(p2$adj.se - p1$coefficients[, "Adj. se"], 1e-6)
 
     ## P-values
     expect_equal(capture.output(print(p1, digits=3))[5],
-                 "x             -0.348  1.003  1.061    6.88  1   0.798")
+                 "x               1.71 0.3501 0.3705     2.4  1  0.1362")
 
     ## Test scaling
     p3 <- dfadjustSE(lm.fit(x=model.matrix(fm2),
-                            y=1e-8*fm2$model$y), d0[[1]]$cl)
+                            y=1e-8*fm2$model$y), d2$cl)
     p4 <- dfadjustSE(lm.fit(x=model.matrix(fm2),
-                            y=1e8*fm2$model$y), d0[[1]]$cl)
+                            y=1e8*fm2$model$y), d2$cl)
     expect_lt(max(abs(p3$vcov*1e16-p1$vcov)), 1e-12)
     expect_lt(max(abs(p4$vcov*1e-16-p1$vcov)), 1e-12)
     p5 <- dfadjustSE(lm.fit(x=model.matrix(fm2)*1e8,
-                            y=fm2$model$y), d0[[1]]$cl)
+                            y=fm2$model$y), d2$cl)
     p6 <- dfadjustSE(lm.fit(x=model.matrix(fm2)*1e-8,
-                            y=fm2$model$y), d0[[1]]$cl)
+                            y=fm2$model$y), d2$cl)
     expect_lt(max(abs(p5$vcov*1e16-p1$vcov)), 1e-12)
     expect_lt(max(abs(p6$vcov*1e-16-p1$vcov)), 1e-12)
 

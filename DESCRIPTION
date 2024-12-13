@@ -14,6 +14,8 @@ Description: Computes small-sample degrees of freedom adjustment for
 Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
+Imports:
+    collapse
 Suggests:
     testthat (>= 2.1.0),
     sandwich,
