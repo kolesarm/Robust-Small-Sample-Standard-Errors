@@ -53,9 +53,6 @@ jobs:
 
     steps:
       ## MK: added. Pandoc for rmd
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get update -y && sudo apt-get install -y ghostscript
       - uses: teatimeguest/setup-texlive-action@v3
         with:
           packages: |
