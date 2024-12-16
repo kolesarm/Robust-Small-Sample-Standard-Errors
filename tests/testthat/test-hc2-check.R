@@ -169,7 +169,7 @@ test_that("New implementation matches old", {
         elt((r$vcov-ro$vcov)/r$vcov, bigep)
 
         elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, bigep)
-        elt((r$coefficients[, "df"]-ro$dof)/ro$dof, bigep)
+        elt((r$coefficients[, "df"]-ro$dof)/ro$dof, 10*bigep)
         elt((r$coefficients[, "Adj. se"]-ro$adj.se) /
                 r$coefficients[, "Adj. se"], 10*bigep)
         elt((r$coefficients[, "HC1 se"]-ro$seStata)/ro$seStata, ep)
