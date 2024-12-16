@@ -78,7 +78,7 @@ dfadjustSE(r1, clustervar=d1$cl, IK=FALSE)
 
 Now, let us run a regression of `y` on `x3`, with fixed effects. Since we're
 only interested in `x3`, we specify that we only want inference on the second
-element:
+element (the first one being the intercept):
 
 ```{r}
 r1 <- lm(y~x3+cl, data=d1)

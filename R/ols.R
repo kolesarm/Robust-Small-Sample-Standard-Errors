@@ -78,13 +78,8 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
     idx <- model$qr$pivot[seq.int(model$qr$rank)]
     Q <- qr.Q(model$qr)[, seq.int(K), drop=FALSE]
     R <- qr.R(model$qr)[seq.int(K), seq.int(K), drop=FALSE]
-    ## Q <- qr.Q(model$qr)
-    ## R <- qr.R(model$qr)
     n <- NROW(Q)
     u <- stats::residuals(model)
-
-    ## if (K < length(model$coefficients))
-    ##     stop("Collinear regressors need to be explicitly dropped")
 
     ## Moulton estimates
     rho <- sig <- NA
@@ -181,9 +176,6 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
         } else {
             ell <- seq(K)
         }
-        ## ell <- round(ell) # round to integer
-        ## if (length(ell) > K)
-        ##     stop("Length of `ell` cannot exceed covariate dimension")
         se <- sqrt(diag(Vhat))[ell]
         dof <- vapply(ell, function(k) df0(diag(K)[, k]), numeric(1))
         seStata <- sqrt(diag(VhatStata))[ell]
@@ -195,7 +187,6 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
                "HC2 se"=se,
                "Adj. se"=se*stats::qt(0.975, df=dof)/stats::qnorm(0.975),
                "df"=dof)
-    ## rownames(r) <- names(beta)
     colnames(Vhat) <- rownames(Vhat) <- names(model$coefficients[idx])
 
     structure(list(vcov=Vhat, coefficients=r,

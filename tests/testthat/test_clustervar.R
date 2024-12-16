@@ -65,6 +65,8 @@ test_that("ell specifications", {
 test_that("collinear specifications", {
     x <- sin(1:100)
     y <- 1:100
+    clustervar <- as.factor(c(rep(1, 40), rep(5, 20),
+                              rep(2, 20), rep(3, 10), rep(4, 10)))
 
     fm1 <- lm(y ~ x)
     fm2 <- lm(y ~ x +I(x))
