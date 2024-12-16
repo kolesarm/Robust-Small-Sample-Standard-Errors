@@ -74,13 +74,17 @@
 #' @export
 dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
                        rho0=FALSE) {
-    Q <- qr.Q(model$qr)
-    R <- qr.R(model$qr)
+    K <- model$rank
+    idx <- model$qr$pivot[seq.int(model$qr$rank)]
+    Q <- qr.Q(model$qr)[, seq.int(K), drop=FALSE]
+    R <- qr.R(model$qr)[seq.int(K), seq.int(K), drop=FALSE]
+    ## Q <- qr.Q(model$qr)
+    ## R <- qr.R(model$qr)
     n <- NROW(Q)
     u <- stats::residuals(model)
-    K <- model$rank
-    if (K < length(model$coefficients))
-        stop("Collinear regressors need to be explicitly dropped")
+
+    ## if (K < length(model$coefficients))
+    ##     stop("Collinear regressors need to be explicitly dropped")
 
     ## Moulton estimates
     rho <- sig <- NA
@@ -103,7 +107,9 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
                 (sum(a^4)-2*sum((a*B)^2)+sum(crossprod(B)^2))
         }
     } else {
-        if (!is.factor(clustervar)) stop("'clustervar' must be a factor")
+        if (!is.factor(clustervar) || length(clustervar) != n) {
+            stop("'clustervar' must be a factor with length n")
+        }
         ## Order u, Q by clusters
         ord <- order(clustervar)
         u <- u[ord]
@@ -162,21 +168,26 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
 
     Vhat <- sandwich(HC2)
     VhatStata <- sandwich(HC1)
-
-    if (length(ell)==K) {
+    if (length(ell) == length(model$qr$pivot)) {
+        ell <- ell[idx]
         se <- drop(sqrt(crossprod(ell, Vhat) %*% ell))
         dof <- df0(ell)
         seStata <- drop(sqrt(crossprod(ell, VhatStata) %*% ell))
         beta <- sum(ell*model$coefficients)
     } else {
-        if (is.null(ell)) ell <- seq(K)
-        ell <- round(ell) # round to integer
-        if (length(ell)> K)
-            stop("Length of `ell` cannot exceed covariate dimension")
+        if (!is.null(ell)) {
+            ell <- (seq_along(model$qr$pivot) %in% ell)[idx]
+            ell <- which(ell)
+        } else {
+            ell <- seq(K)
+        }
+        ## ell <- round(ell) # round to integer
+        ## if (length(ell) > K)
+        ##     stop("Length of `ell` cannot exceed covariate dimension")
         se <- sqrt(diag(Vhat))[ell]
         dof <- vapply(ell, function(k) df0(diag(K)[, k]), numeric(1))
         seStata <- sqrt(diag(VhatStata))[ell]
-        beta <-  model$coefficients[ell]
+        beta <-  model$coefficients[idx][ell]
     }
 
     r <- cbind("Estimate"=beta,
@@ -184,8 +195,8 @@ dfadjustSE <- function(model, clustervar=NULL, ell=NULL, IK=TRUE, tol=1e-9,
                "HC2 se"=se,
                "Adj. se"=se*stats::qt(0.975, df=dof)/stats::qnorm(0.975),
                "df"=dof)
-    rownames(r) <- names(beta)
-    colnames(Vhat) <- rownames(Vhat) <- names(model$coefficients)
+    ## rownames(r) <- names(beta)
+    colnames(Vhat) <- rownames(Vhat) <- names(model$coefficients[idx])
 
     structure(list(vcov=Vhat, coefficients=r,
                    rho=rho, sig=sig), class="dfadjustSE")

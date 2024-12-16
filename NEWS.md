@@ -8,7 +8,7 @@
 ## Minor improvements and fixes
 
 - Use `collapse::fsum` instead of `tapply` calls to improve speed
-- Check that covariates are not collinear
+- Check that covariates are not collinear, drop the collinear ones
 
 # dfadjust 1.0.5
 

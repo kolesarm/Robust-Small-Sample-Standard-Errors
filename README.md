@@ -6,9 +6,6 @@ This package implements the small-sample degrees of freedom adjustments for
 robust and cluster-robust standard errors in linear regression described in
 [Imbens and Kolesár (2016)](https://doi.org/10.1162/REST_a_00552).
 
-SAS version by Nicolas Moreau is available
-[here](http://cemoi.univ-reunion.fr/econometrie-avec-r-et-sas).
-
 See vignette [dfadjust](doc/dfadjust.pdf) for description of the package
 (available through `vignette("dfadjust")` once package is installed), and the
 package [manual](doc/manual.pdf) for documentation of the package functions.
@@ -18,9 +15,8 @@ package [manual](doc/manual.pdf) for documentation of the package functions.
 
 No clustering:
 ``` r
-set.seed(42)
 x <- sin(1:10)
-y <- rnorm(10)
+y <- tan(1:10)
 fm <- lm(y~x)
 dfadjustSE(fm)
 ```
@@ -33,7 +29,7 @@ Here we defined the first six observations to be in cluster 1, the next two in
 cluster 2, and the last three in cluster three.
 
 The package handles cluster fixed effects, and large clusters. Computing the
-adjustment with one million observations and 50 clusters, takes about 5 seconds:
+adjustment with one million observations and 50 clusters takes about 5 seconds:
 
 ``` r
 N <- 10^6

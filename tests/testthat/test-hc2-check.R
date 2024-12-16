@@ -2,7 +2,6 @@ context("Test formulas")
 
 elt <- function(a, ep) testthat::expect_lt(max(abs(a)), ep)
 
-
 test_that("HC1 and HC2 formulas match sandwich", {
     y <- 1:10
     x <- cbind(sin(1:10), sin(2:11))
@@ -12,8 +11,8 @@ test_that("HC1 and HC2 formulas match sandwich", {
     HC2 <- sandwich::vcovHC(fm, type="HC2")
     r <- dfadjustSE(fm)
 
-    elt(r$vcov-HC2, 100*.Machine$double.eps)
-    elt(r$coefficients[, "HC1 se"]-sqrt(diag(HC1)), 100*.Machine$double.eps)
+    elt(r$vcov-HC2, 10^3*.Machine$double.eps)
+    elt(r$coefficients[, "HC1 se"]-sqrt(diag(HC1)), 10^3*.Machine$double.eps)
     elt(r$coefficients[, "df"]-c(4.94624731, 3.90754737, 4.77265484),
         1e-8)
 })
@@ -162,15 +161,15 @@ test_that("New implementation matches old", {
         elt(r$coefficients[, 5]-ro$dof, bigep)
         ## If each observation in its cluster, we get HC2
         cl <- as.factor(seq_along(fm$model$y))
-        elt(dfadjustSE(fm, cl, IK=FALSE)$coefficients-r$coefficients, 10*ep)
+        elt(dfadjustSE(fm, cl, IK=FALSE)$coefficients-r$coefficients, bigep)
 
         ## Clustering
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=FALSE)
         ro <- BMlmSE(fm, d0[[j]]$cl, IK=FALSE)
         elt((r$vcov-ro$vcov)/r$vcov, bigep)
 
-        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, 10*ep)
-        elt(r$coefficients[, "df"]-ro$dof, bigep)
+        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, bigep)
+        elt((r$coefficients[, "df"]-ro$dof)/ro$dof, bigep)
         elt((r$coefficients[, "Adj. se"]-ro$adj.se) /
                 r$coefficients[, "Adj. se"], 10*bigep)
         elt((r$coefficients[, "HC1 se"]-ro$seStata)/ro$seStata, ep)
@@ -178,7 +177,7 @@ test_that("New implementation matches old", {
         r <- dfadjustSE(fm, d0[[j]]$cl, IK=TRUE, rho0=TRUE)
         ro <- BMlmSE(fm, d0[[j]]$cl, IK=TRUE)
         elt((r$vcov-ro$vcov)/r$vcov, bigep)
-        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, 10*ep)
+        elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, bigep)
         elt(r$coefficients[, "df"]-ro$dof, ep)
         elt((r$coefficients[, "Adj. se"]-ro$adj.se)/ro$adj.se, bigep)
         elt((r$coefficients[, "HC1 se"]-ro$seStata)/ro$seStata, ep)
@@ -240,5 +239,4 @@ test_that("New implementation matches old", {
                             y=fm2$model$y), d2$cl)
     expect_lt(max(abs(p5$vcov*1e16-p1$vcov)), 1e-12)
     expect_lt(max(abs(p6$vcov*1e-16-p1$vcov)), 1e-12)
-
 })

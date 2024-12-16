@@ -55,11 +55,28 @@ test_that("ell specifications", {
                               rep(2, 20), rep(3, 10), rep(4, 10)))
     r0 <- dfadjustSE(fm, clustervar, ell=2)
     r1 <- dfadjustSE(fm, clustervar, ell=c(0, 1, 0))
-    expect_error(dfadjustSE(fm, clustervar, ell=c(0, 1, 0, 1, 1)))
     expect_equal(drop(unname(r1$coefficients-r0$coefficients)), rep(0, 5))
+
     r2 <- dfadjustSE(fm, clustervar, ell=c(1, 3))
     r3 <- dfadjustSE(fm, clustervar)
     expect_equal(r3$coefficients[c(1, 3), ], r2$coefficients)
-    fm <- lm(y ~ x +I(x))
-    expect_error(r4 <- dfadjustSE(fm, clustervar))
+})
+
+test_that("collinear specifications", {
+    x <- sin(1:100)
+    y <- 1:100
+
+    fm1 <- lm(y ~ x)
+    fm2 <- lm(y ~ x +I(x))
+    r1 <- dfadjustSE(fm1, clustervar)
+    r2 <- dfadjustSE(fm2, clustervar)
+    expect_equal(r1, r2)
+    fm3 <- lm(y ~ x +I(x^2) + I(x) + I(x^2+0)+I(sin(x)))
+    fm4 <- lm(y ~ x +I(x^2) + I(sin(x)))
+    r3 <- dfadjustSE(fm3, clustervar)
+    r4 <- dfadjustSE(fm4, clustervar)
+    expect_equal(r4, r3)
+    r5 <- dfadjustSE(fm3, clustervar, ell=6)
+    r6 <- dfadjustSE(fm4, clustervar, ell=4)
+    expect_equal(r5, r6)
 })
