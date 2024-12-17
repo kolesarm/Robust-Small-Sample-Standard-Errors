@@ -55,6 +55,9 @@ test_that("ell specifications", {
                               rep(2, 20), rep(3, 10), rep(4, 10)))
     r0 <- dfadjustSE(fm, clustervar, ell=2)
     r1 <- dfadjustSE(fm, clustervar, ell=c(0, 1, 0))
+    expect_equal(unname(drop(r0$coefficients)),
+                 c(-1.955355241, 2.344474843, 2.460094992, 3.800204856,
+                   3.294011681))
     expect_equal(drop(unname(r1$coefficients-r0$coefficients)), rep(0, 5))
 
     r2 <- dfadjustSE(fm, clustervar, ell=c(1, 3))
@@ -65,8 +68,8 @@ test_that("ell specifications", {
 test_that("collinear specifications", {
     x <- sin(1:100)
     y <- 1:100
-    clustervar <- as.factor(c(rep(1, 40), rep(5, 20),
-                              rep(2, 20), rep(3, 10), rep(4, 10)))
+    clustervar <- as.factor(c(rep(1, 40), rep(5, 20), rep(2, 20), rep(3, 10),
+                              rep(4, 10)))
 
     fm1 <- lm(y ~ x)
     fm2 <- lm(y ~ x +I(x))
@@ -81,4 +84,7 @@ test_that("collinear specifications", {
     r5 <- dfadjustSE(fm3, clustervar, ell=6)
     r6 <- dfadjustSE(fm4, clustervar, ell=4)
     expect_equal(r5, r6)
+    expect_equal(unname(drop(r5$coefficients)),
+                 c(-13.36138026, 17.85272942, 18.62369808, 30.96797826,
+                   2.879574761))
 })

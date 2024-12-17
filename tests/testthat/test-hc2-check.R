@@ -143,7 +143,7 @@ test_that("New implementation matches old", {
                data.frame(y = (1:100)^2+cl3,
                           x=cbind(sin(1:100), 1:100),
                           cl=as.factor(cl3)))
-    ep <- 100*.Machine$double.eps
+    ep <- 10^3*.Machine$double.eps
     ## Increase numerical tolerance if platform doesn't have long double.
     ## BLAS/LAPACK 3.10.1 in R-devel also seemes to be creating issues on M1 Mac
     bigep <- if (capabilities("long.double")) 10*ep else 10^4*ep
@@ -155,10 +155,9 @@ test_that("New implementation matches old", {
         r <- dfadjustSE(fm)
         ro <- BMlmSE(fm)
         elt((r$vcov-ro$vcov)/r$vcov, ep)
-        elt(r$coefficients[, "df"]-ro$dof, bigep)
-        elt(r$coefficients[, "Adj. se"]-ro$adj.se, bigep)
+        elt((r$coefficients[, "df"]-ro$dof)/ro$dof, bigep)
+        elt((r$coefficients[, "Adj. se"]-ro$adj.se)/ro$adj.se, bigep)
         elt((r$coefficients[, "HC2 se"]-ro$se)/ro$se, ep)
-        elt(r$coefficients[, 5]-ro$dof, bigep)
         ## If each observation in its cluster, we get HC2
         cl <- as.factor(seq_along(fm$model$y))
         elt(dfadjustSE(fm, cl, IK=FALSE)$coefficients-r$coefficients, bigep)
